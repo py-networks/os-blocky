@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# blocky refuses to start when its query log target is missing, and the list cache has to exist
+# before the first download. Create both here so that a fresh install works without an apply first.
+mkdir -p /var/log/blocky/querylog /var/cache/blocky/lists
+chmod 0750 /var/log/blocky /var/log/blocky/querylog /var/cache/blocky /var/cache/blocky/lists
+
+mkdir -p -m 0700 /usr/local/etc/blocky

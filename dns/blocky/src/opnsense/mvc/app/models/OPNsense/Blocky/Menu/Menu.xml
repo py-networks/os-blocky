@@ -3,7 +3,8 @@
         <Blocky VisibleName="Blocky" cssClass="fa fa-ban fa-fw">
             <Status order="10" url="/ui/blocky/status"/>
             <Settings order="20" url="/ui/blocky/"/>
-            <Log VisibleName="Log File" order="30" url="/ui/diagnostics/log/core/blocky"/>
+            <Querylog VisibleName="Query Log" order="30" url="/ui/blocky/querylog"/>
+            <Log VisibleName="Log File" order="40" url="/ui/diagnostics/log/core/blocky"/>
         </Blocky>
     </Services>
 </menu>

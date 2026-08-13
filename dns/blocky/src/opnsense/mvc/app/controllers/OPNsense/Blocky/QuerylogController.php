@@ -29,35 +29,12 @@
 namespace OPNsense\Blocky;
 
 /**
- * Settings page for the blocky service.
+ * Query log browser.
  */
-class IndexController extends \OPNsense\Base\IndexController
+class QuerylogController extends \OPNsense\Base\IndexController
 {
     public function indexAction()
     {
-        $forms = [
-            'general', 'upstreams', 'blocking', 'customdns', 'conditional',
-            'caching', 'querylog', 'encryption', 'advanced',
-        ];
-
-        foreach ($forms as $form) {
-            $this->view->setVar($form . 'Form', $this->getForm($form));
-        }
-
-        /*
-         * The grid id doubles as the API endpoint suffix in the view, so it is set explicitly
-         * rather than defaulting to the form name.
-         */
-        $grids = [
-            'Upstream', 'Denylist', 'Allowlist', 'Clientgroup', 'Schedule',
-            'Listschedule', 'Mapping', 'Rewrite', 'Forward',
-        ];
-
-        foreach ($grids as $grid) {
-            $this->view->setVar('formDialog' . $grid, $this->getForm('dialog' . $grid));
-            $this->view->setVar('formGrid' . $grid, $this->getFormGrid('dialog' . $grid, strtolower($grid)));
-        }
-
-        $this->view->pick('OPNsense/Blocky/index');
+        $this->view->pick('OPNsense/Blocky/querylog');
     }
 }

@@ -1,0 +1,26 @@
+<metadata>
+    <Blocky>
+        <filename>Blocky.js</filename>
+        <link>/ui/blocky/status</link>
+        <endpoints>
+            <endpoint>/api/blocky/blocking/status</endpoint>
+            <endpoint>/api/blocky/service/status</endpoint>
+            <endpoint>/api/blocky/status/stats</endpoint>
+        </endpoints>
+        <translations>
+            <title>Blocky</title>
+            <servicestopped>The blocky service is not running</servicestopped>
+            <blocking>Blocking</blocking>
+            <on>On</on>
+            <off>Off</off>
+            <unknown>Unknown</unknown>
+            <minutesleft>min left</minutesleft>
+            <disabledgroups>Disabled groups</disabledgroups>
+            <queries>Queries (24h)</queries>
+            <blocked>Blocked</blocked>
+            <cachehitrate>Cache hit rate</cachehitrate>
+            <listentries>Block list entries</listentries>
+            <statistics>Statistics</statistics>
+        </translations>
+    </Blocky>
+</metadata>

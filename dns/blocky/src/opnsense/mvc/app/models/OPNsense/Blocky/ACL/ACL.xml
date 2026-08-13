@@ -4,6 +4,10 @@
         <patterns>
             <pattern>ui/blocky/*</pattern>
             <pattern>api/blocky/*</pattern>
+            <pattern>api/blocky/service/*</pattern>
+            <pattern>api/blocky/settings/*</pattern>
+            <pattern>api/blocky/blocking/*</pattern>
+            <pattern>api/blocky/status/*</pattern>
         </patterns>
     </page-services-blocky>
     <page-services-blocky-log>

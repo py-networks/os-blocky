@@ -1,0 +1,17 @@
+<metadata>
+    <BlockyStats>
+        <filename>BlockyStats.js</filename>
+        <link>/ui/blocky/status</link>
+        <endpoints>
+            <endpoint>/api/blocky/status/stats</endpoint>
+        </endpoints>
+        <translations>
+            <title>Blocky Statistics</title>
+            <queries>Queries (24h)</queries>
+            <blocked>Blocked</blocked>
+            <blockrate>Block rate</blockrate>
+            <allowed>Allowed</allowed>
+            <nodata>No statistics available. Check that the blocky service is running and statistics are enabled.</nodata>
+        </translations>
+    </BlockyStats>
+</metadata>

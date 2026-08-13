@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# PROVIDE: blocky_opn
+# REQUIRE: DAEMON NETWORKING
+# KEYWORD: shutdown
+#
+# This is the stock dns/blocky rc script with the daemon output sent to syslog instead of a flat
+# file, so that the log is picked up by syslog-ng and rendered by the OPNsense log viewer. The
+# port's own script stays disabled; see the rc.conf.d template.
+
+. /etc/rc.subr
+
+name=blocky_opn
+rcvar=blocky_opn_enable
+
+load_rc_config ${name}
+
+: ${blocky_opn_enable:=NO}
+: ${blocky_opn_config:="/usr/local/etc/blocky-config.yml"}
+: ${blocky_opn_flags:=}
+
+pidfile="/var/run/blocky.pid"
+blocky_path="/usr/local/sbin/blocky"
+
+command="/usr/sbin/daemon"
+procname="${blocky_path}"
+command_args="-c -f -S -T blocky -p ${pidfile} ${blocky_path} \
+	-c ${blocky_opn_config} ${blocky_opn_flags}"
+
+run_rc_command "$1"

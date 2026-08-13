@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# The rc.conf.d fragment is generated from a template, so pkg does not track it.
+rm -f /etc/rc.conf.d/blocky_opn

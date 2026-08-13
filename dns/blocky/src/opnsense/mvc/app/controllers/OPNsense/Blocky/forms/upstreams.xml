@@ -1,0 +1,26 @@
+<form>
+    <field>
+        <type>header</type>
+        <label>Resolution Behaviour</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.upstreams.strategy</id>
+        <label>Strategy</label>
+        <type>dropdown</type>
+        <help>How a group's upstream resolvers are picked. Parallel best queries two at random and takes the first answer.</help>
+    </field>
+    <field>
+        <id>blocky.upstreams.timeout</id>
+        <label>Timeout</label>
+        <type>text</type>
+        <help>How long to wait for an upstream resolver, for example 2s.</help>
+    </field>
+    <field>
+        <id>blocky.upstreams.init_strategy</id>
+        <label>Startup Strategy</label>
+        <type>dropdown</type>
+        <advanced>true</advanced>
+        <help>What blocky does with its upstream resolvers while starting up.</help>
+    </field>
+</form>

@@ -1,0 +1,8 @@
+<menu>
+    <Services>
+        <Blocky VisibleName="Blocky" cssClass="fa fa-ban fa-fw">
+            <Settings order="10" url="/ui/blocky/"/>
+            <Log VisibleName="Log File" order="30" url="/ui/diagnostics/log/core/blocky"/>
+        </Blocky>
+    </Services>
+</menu>

@@ -1,0 +1,10 @@
+Blocky is a DNS proxy and ad-blocker for the local network. It filters
+queries against downloadable deny and allow lists, caches and prefetches
+responses, forwards selected domains to specific upstream resolvers, and
+speaks DNS over TLS, HTTPS and QUIC both upstream and downstream.
+
+This plugin manages the blocky configuration and service from the OPNsense
+web interface, and adds a status page, dashboard widgets and a query log
+viewer built on blocky's own statistics API.
+
+WWW: https://github.com/0xERR0R/blocky

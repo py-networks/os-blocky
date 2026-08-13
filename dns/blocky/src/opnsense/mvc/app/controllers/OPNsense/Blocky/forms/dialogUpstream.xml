@@ -1,0 +1,31 @@
+<form>
+    <field>
+        <id>upstream.enabled</id>
+        <label>Enabled</label>
+        <type>checkbox</type>
+        <grid_view>
+            <width>6em</width>
+            <type>boolean</type>
+            <formatter>rowtoggle</formatter>
+        </grid_view>
+        <help>Enable this upstream resolver.</help>
+    </field>
+    <field>
+        <id>upstream.group</id>
+        <label>Group</label>
+        <type>text</type>
+        <help>The client group this resolver serves. The group "default" is used for every client that has no group of its own, and must contain at least one resolver.</help>
+    </field>
+    <field>
+        <id>upstream.address</id>
+        <label>Address</label>
+        <type>text</type>
+        <help>Upstream resolver, optionally prefixed with a protocol: 1.1.1.1, tcp-tls:1.1.1.1:853, https://dns.quad9.net/dns-query or quic:dns.adguard.com.</help>
+    </field>
+    <field>
+        <id>upstream.description</id>
+        <label>Description</label>
+        <type>text</type>
+        <help>Optional description for this entry.</help>
+    </field>
+</form>

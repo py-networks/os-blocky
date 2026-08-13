@@ -1,0 +1,108 @@
+<model>
+    <mount>//OPNsense/Blocky</mount>
+    <version>1.0.0</version>
+    <description>Blocky DNS proxy and ad-blocker settings</description>
+    <items>
+        <general>
+            <enabled type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </enabled>
+            <listen_address type="CSVListField">
+                <Default>5300</Default>
+                <Required>Y</Required>
+                <Mask>/^(\[[0-9a-fA-F:.]+\]:|[0-9a-zA-Z.\-]+:|:)?[0-9]{1,5}$/</Mask>
+                <MaskPerItem>Y</MaskPerItem>
+                <ValidationMessage>Use a port number, or an address and port such as 192.168.1.1:53 or [::1]:53.</ValidationMessage>
+            </listen_address>
+            <api_port type="IntegerField">
+                <Default>4000</Default>
+                <Required>Y</Required>
+                <MinimumValue>1</MinimumValue>
+                <MaximumValue>65535</MaximumValue>
+                <ValidationMessage>Enter a valid port number.</ValidationMessage>
+            </api_port>
+            <connect_ip_version type="OptionField">
+                <Default>dual</Default>
+                <Required>Y</Required>
+                <OptionValues>
+                    <dual>IPv4 and IPv6</dual>
+                    <v4>IPv4 only</v4>
+                    <v6>IPv6 only</v6>
+                </OptionValues>
+            </connect_ip_version>
+            <bootstrap_dns type="CSVListField">
+                <Mask>/^(tcp\+udp:|tcp:|udp:|tcp-tls:|quic:|https:\/\/|sdns:\/\/)?[^\s,]+$/</Mask>
+                <MaskPerItem>Y</MaskPerItem>
+                <ValidationMessage>Enter one or more upstream resolvers, for example tcp+udp:1.1.1.1.</ValidationMessage>
+            </bootstrap_dns>
+            <enable_metrics type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </enable_metrics>
+            <enable_statistics type="BooleanField">
+                <Default>1</Default>
+                <Required>Y</Required>
+            </enable_statistics>
+            <log_level type="OptionField">
+                <Default>info</Default>
+                <Required>Y</Required>
+                <OptionValues>
+                    <trace>Trace</trace>
+                    <debug>Debug</debug>
+                    <info>Informational</info>
+                    <warn>Warning</warn>
+                    <error>Error</error>
+                </OptionValues>
+            </log_level>
+            <log_privacy type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </log_privacy>
+        </general>
+        <upstreams>
+            <strategy type="OptionField">
+                <Default>parallel_best</Default>
+                <Required>Y</Required>
+                <OptionValues>
+                    <parallel_best>Parallel best</parallel_best>
+                    <strict>Strict order</strict>
+                    <random>Random</random>
+                </OptionValues>
+            </strategy>
+            <timeout type="TextField">
+                <Default>2s</Default>
+                <Required>Y</Required>
+                <Mask>/^([0-9]+(ms|s|m|h))+$/</Mask>
+                <ValidationMessage>Enter a duration such as 500ms, 2s or 1m.</ValidationMessage>
+            </timeout>
+            <init_strategy type="OptionField">
+                <Default>blocking</Default>
+                <Required>Y</Required>
+                <OptionValues>
+                    <blocking>Wait for upstreams before serving</blocking>
+                    <failOnError>Abort startup when an upstream fails</failOnError>
+                    <fast>Serve immediately, verify in background</fast>
+                </OptionValues>
+            </init_strategy>
+            <upstream type="ArrayField">
+                <enabled type="BooleanField">
+                    <Default>1</Default>
+                    <Required>Y</Required>
+                </enabled>
+                <group type="TextField">
+                    <Default>default</Default>
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-zA-Z_.\-]+$/</Mask>
+                    <ValidationMessage>A group name may only contain letters, digits, dots, underscores and hyphens.</ValidationMessage>
+                </group>
+                <address type="TextField">
+                    <Required>Y</Required>
+                    <Mask>/^(tcp\+udp:|tcp:|udp:|tcp-tls:|quic:|https:\/\/|sdns:\/\/)?[^\s]+$/</Mask>
+                    <ValidationMessage>Enter an upstream such as 1.1.1.1, tcp-tls:1.1.1.1:853 or https://dns.quad9.net/dns-query.</ValidationMessage>
+                </address>
+                <description type="DescriptionField"/>
+            </upstream>
+        </upstreams>
+    </items>
+</model>

@@ -1,0 +1,16 @@
+<acl>
+    <page-services-blocky>
+        <name>Services: Blocky</name>
+        <patterns>
+            <pattern>ui/blocky/*</pattern>
+            <pattern>api/blocky/*</pattern>
+        </patterns>
+    </page-services-blocky>
+    <page-services-blocky-log>
+        <name>Services: Blocky: Log File</name>
+        <patterns>
+            <pattern>ui/diagnostics/log/core/blocky/*</pattern>
+            <pattern>api/diagnostics/log/core/blocky/*</pattern>
+        </patterns>
+    </page-services-blocky-log>
+</acl>

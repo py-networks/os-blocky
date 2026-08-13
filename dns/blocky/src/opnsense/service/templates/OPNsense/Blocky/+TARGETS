@@ -1,0 +1,2 @@
+rc.conf.d:/etc/rc.conf.d/blocky_opn
+blocky-config.yml:/usr/local/etc/blocky-config.yml

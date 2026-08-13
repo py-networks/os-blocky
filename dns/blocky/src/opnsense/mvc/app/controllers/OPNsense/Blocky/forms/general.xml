@@ -1,0 +1,74 @@
+<form>
+    <field>
+        <type>header</type>
+        <label>General</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.general.enabled</id>
+        <label>Enable</label>
+        <type>checkbox</type>
+        <help>Enable the blocky DNS proxy.</help>
+    </field>
+    <field>
+        <id>blocky.general.listen_address</id>
+        <label>Listen Address</label>
+        <type>text</type>
+        <help>Addresses and ports to serve DNS on, separated by commas. A bare port listens on all addresses. The default of 5300 avoids a collision with Unbound; to serve the network on port 53, disable Unbound first.</help>
+    </field>
+    <field>
+        <id>blocky.general.connect_ip_version</id>
+        <label>IP Version</label>
+        <type>dropdown</type>
+        <advanced>true</advanced>
+        <help>Which IP version to use when connecting to upstream resolvers.</help>
+    </field>
+    <field>
+        <id>blocky.general.bootstrap_dns</id>
+        <label>Bootstrap DNS</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>Resolvers used to look up the hostnames of the upstream resolvers themselves. Leave empty to use the resolvers configured on this firewall.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>Logging</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.general.log_level</id>
+        <label>Log Level</label>
+        <type>dropdown</type>
+        <help>Verbosity of the service log.</help>
+    </field>
+    <field>
+        <id>blocky.general.log_privacy</id>
+        <label>Obfuscate Log</label>
+        <type>checkbox</type>
+        <help>Obfuscate domain names and IP addresses in the log.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>API and Metrics</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.general.enable_statistics</id>
+        <label>Collect Statistics</label>
+        <type>checkbox</type>
+        <help>Collect in-memory query statistics. Required by the status page and the dashboard widgets.</help>
+    </field>
+    <field>
+        <id>blocky.general.enable_metrics</id>
+        <label>Prometheus Metrics</label>
+        <type>checkbox</type>
+        <help>Expose Prometheus metrics for scraping by an external monitoring system.</help>
+    </field>
+    <field>
+        <id>blocky.general.api_port</id>
+        <label>API Port</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>Port for blocky's HTTP API on the loopback address. The API is unauthenticated, so it is never bound to a routable address.</help>
+    </field>
+</form>

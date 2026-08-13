@@ -1,0 +1,32 @@
+<form>
+    <field>
+        <type>header</type>
+        <label>Query Log</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.querylog.type</id>
+        <label>Destination</label>
+        <type>dropdown</type>
+        <help>Where individual queries are recorded. Files are written to /var/log/blocky/querylog and can be browsed from the Query Log page.</help>
+    </field>
+    <field>
+        <id>blocky.querylog.log_retention_days</id>
+        <label>Retention</label>
+        <type>text</type>
+        <help>How many days of query logs to keep. Use 0 to keep them forever.</help>
+    </field>
+    <field>
+        <id>blocky.querylog.fields</id>
+        <label>Fields</label>
+        <type>select_multiple</type>
+        <help>Which values are recorded. Omitted values are left blank rather than dropped, so the column layout stays the same.</help>
+    </field>
+    <field>
+        <id>blocky.querylog.flush_interval</id>
+        <label>Flush Interval</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>How often buffered entries are written out.</help>
+    </field>
+</form>

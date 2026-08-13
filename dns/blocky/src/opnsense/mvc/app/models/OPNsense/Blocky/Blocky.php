@@ -111,6 +111,38 @@ class Blocky extends BaseModel
             }
         }
 
+        /*
+         * blocky only activates blocking for clients listed in clientGroupsBlock. A deny list in a
+         * group nothing subscribes to is downloaded and then silently ignored, which is a confusing
+         * way to find out that nothing is being blocked.
+         */
+        if ($validateFullModel || $this->blocking->denylist->isFieldChanged()) {
+            $subscribed = [];
+            foreach ($this->clientgroups->clientgroup->iterateItems() as $clientgroup) {
+                if ((string)$clientgroup->enabled !== '1') {
+                    continue;
+                }
+                foreach (explode(',', (string)$clientgroup->groups) as $group) {
+                    $subscribed[] = trim($group);
+                }
+            }
+
+            foreach ($this->blocking->denylist->iterateItems() as $uuid => $denylist) {
+                if ((string)$denylist->enabled !== '1') {
+                    continue;
+                }
+                if (!in_array((string)$denylist->group, $subscribed)) {
+                    $messages->appendMessage(new Message(
+                        gettext(
+                            'No client group uses this list group, so this list is downloaded but ' .
+                            'never applied. Add it to a client on the Client Groups tab.'
+                        ),
+                        $denylist->group->__reference
+                    ));
+                }
+            }
+        }
+
         return $messages;
     }
 }

@@ -1,0 +1,77 @@
+<form>
+    <field>
+        <type>header</type>
+        <label>Blocking Behaviour</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.blocking.block_type</id>
+        <label>Block Response</label>
+        <type>text</type>
+        <help>How a blocked query is answered: zeroIp for 0.0.0.0, nxDomain for a non-existent domain, or a comma separated list of IP addresses to answer with.</help>
+    </field>
+    <field>
+        <id>blocky.blocking.block_ttl</id>
+        <label>Block TTL</label>
+        <type>text</type>
+        <help>How long clients may cache a blocked answer.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>List Loading</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.blocking.refresh_period</id>
+        <label>Refresh Period</label>
+        <type>text</type>
+        <help>How often lists are downloaded again. Use 0s to only load them at startup.</help>
+    </field>
+    <field>
+        <id>blocky.blocking.loading_strategy</id>
+        <label>Startup Strategy</label>
+        <type>dropdown</type>
+        <help>What blocky does with its lists while starting up.</help>
+    </field>
+    <field>
+        <id>blocky.blocking.cache_downloads</id>
+        <label>Cache Downloads</label>
+        <type>checkbox</type>
+        <help>Keep a copy of every downloaded list under /var/cache/blocky so that lists survive a reboot or an outage at the list provider.</help>
+    </field>
+    <field>
+        <id>blocky.blocking.concurrency</id>
+        <label>Concurrency</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>How many lists are downloaded and parsed at the same time.</help>
+    </field>
+    <field>
+        <id>blocky.blocking.max_errors_per_source</id>
+        <label>Tolerated Errors</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>How many unparsable lines a single list may contain before it is rejected. Use -1 to accept any number.</help>
+    </field>
+    <field>
+        <id>blocky.blocking.download_timeout</id>
+        <label>Download Timeout</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>How long a single download attempt may take.</help>
+    </field>
+    <field>
+        <id>blocky.blocking.download_attempts</id>
+        <label>Download Attempts</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>How often a failing download is retried.</help>
+    </field>
+    <field>
+        <id>blocky.blocking.download_cooldown</id>
+        <label>Download Cooldown</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>How long to wait between two download attempts.</help>
+    </field>
+</form>

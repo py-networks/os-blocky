@@ -1,0 +1,31 @@
+<form>
+    <field>
+        <id>rewrite.enabled</id>
+        <label>Enabled</label>
+        <type>checkbox</type>
+        <grid_view>
+            <width>6em</width>
+            <type>boolean</type>
+            <formatter>rowtoggle</formatter>
+        </grid_view>
+        <help>Enable this rewrite.</help>
+    </field>
+    <field>
+        <id>rewrite.from</id>
+        <label>From</label>
+        <type>text</type>
+        <help>The domain suffix to replace before the custom mappings are consulted, for example home.</help>
+    </field>
+    <field>
+        <id>rewrite.to</id>
+        <label>To</label>
+        <type>text</type>
+        <help>The domain suffix to replace it with, for example lan. A query for pc.home is then answered as pc.lan.</help>
+    </field>
+    <field>
+        <id>rewrite.description</id>
+        <label>Description</label>
+        <type>text</type>
+        <help>Optional description for this entry.</help>
+    </field>
+</form>

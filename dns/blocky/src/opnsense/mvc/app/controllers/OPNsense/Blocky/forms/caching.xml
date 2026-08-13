@@ -1,0 +1,63 @@
+<form>
+    <field>
+        <type>header</type>
+        <label>Cache</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.caching.min_time</id>
+        <label>Minimum TTL</label>
+        <type>text</type>
+        <help>Answers with a shorter TTL than this are still kept for this long. Use 0s to honour the upstream TTL.</help>
+    </field>
+    <field>
+        <id>blocky.caching.max_time</id>
+        <label>Maximum TTL</label>
+        <type>text</type>
+        <help>Answers are never kept longer than this. Use 0s for no cap, or -1s to disable caching entirely.</help>
+    </field>
+    <field>
+        <id>blocky.caching.cache_time_negative</id>
+        <label>Negative TTL</label>
+        <type>text</type>
+        <help>How long a failed lookup is remembered. Use -1s to disable negative caching.</help>
+    </field>
+    <field>
+        <id>blocky.caching.max_items_count</id>
+        <label>Maximum Entries</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>Upper bound on the number of cached answers. Use 0 for unlimited.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>Prefetching</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.caching.prefetching</id>
+        <label>Enable Prefetching</label>
+        <type>checkbox</type>
+        <help>Refresh frequently queried names before they expire, so that common lookups are always answered from cache.</help>
+    </field>
+    <field>
+        <id>blocky.caching.prefetch_threshold</id>
+        <label>Threshold</label>
+        <type>text</type>
+        <help>How many times a name must be queried within the tracking window before it is prefetched.</help>
+    </field>
+    <field>
+        <id>blocky.caching.prefetch_expires</id>
+        <label>Tracking Window</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>How long a name is tracked for the threshold above.</help>
+    </field>
+    <field>
+        <id>blocky.caching.prefetch_max_items_count</id>
+        <label>Maximum Tracked Names</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>Upper bound on the number of tracked names. Use 0 for unlimited.</help>
+    </field>
+</form>

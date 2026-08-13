@@ -1,0 +1,31 @@
+<form>
+    <field>
+        <id>forward.enabled</id>
+        <label>Enabled</label>
+        <type>checkbox</type>
+        <grid_view>
+            <width>6em</width>
+            <type>boolean</type>
+            <formatter>rowtoggle</formatter>
+        </grid_view>
+        <help>Enable this forwarding rule.</help>
+    </field>
+    <field>
+        <id>forward.domain</id>
+        <label>Domain</label>
+        <type>text</type>
+        <help>The domain to forward, such as lan. Leave empty to forward every query that does not contain a dot.</help>
+    </field>
+    <field>
+        <id>forward.resolvers</id>
+        <label>Resolvers</label>
+        <type>text</type>
+        <help>Comma separated resolvers to forward this domain to.</help>
+    </field>
+    <field>
+        <id>forward.description</id>
+        <label>Description</label>
+        <type>text</type>
+        <help>Optional description for this entry.</help>
+    </field>
+</form>

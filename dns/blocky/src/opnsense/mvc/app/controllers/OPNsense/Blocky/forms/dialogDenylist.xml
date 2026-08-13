@@ -1,0 +1,46 @@
+<form>
+    <field>
+        <id>denylist.enabled</id>
+        <label>Enabled</label>
+        <type>checkbox</type>
+        <grid_view>
+            <width>6em</width>
+            <type>boolean</type>
+            <formatter>rowtoggle</formatter>
+        </grid_view>
+        <help>Enable this list.</help>
+    </field>
+    <field>
+        <id>denylist.group</id>
+        <label>Group</label>
+        <type>text</type>
+        <help>The list group this source belongs to. Clients are pointed at group names on the Client Groups tab; a list in a group no client uses is downloaded but never applied.</help>
+    </field>
+    <field>
+        <id>denylist.source_type</id>
+        <label>Source</label>
+        <type>dropdown</type>
+        <help>Where the list comes from.</help>
+    </field>
+    <field>
+        <id>denylist.source</id>
+        <label>URL or Path</label>
+        <type>text</type>
+        <help>The URL to download, or the absolute path of a local file. Leave empty when the entries are typed in below.</help>
+    </field>
+    <field>
+        <id>denylist.content</id>
+        <label>Entries</label>
+        <type>textbox</type>
+        <grid_view>
+            <visible>false</visible>
+        </grid_view>
+        <help>One entry per line, used when the source is set to "Entered below". An entry can be a domain, a wildcard such as *.example.com, or a regular expression wrapped in slashes.</help>
+    </field>
+    <field>
+        <id>denylist.description</id>
+        <label>Description</label>
+        <type>text</type>
+        <help>Optional description for this entry.</help>
+    </field>
+</form>

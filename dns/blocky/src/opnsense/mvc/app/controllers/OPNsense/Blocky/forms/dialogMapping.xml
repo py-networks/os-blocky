@@ -1,0 +1,31 @@
+<form>
+    <field>
+        <id>mapping.enabled</id>
+        <label>Enabled</label>
+        <type>checkbox</type>
+        <grid_view>
+            <width>6em</width>
+            <type>boolean</type>
+            <formatter>rowtoggle</formatter>
+        </grid_view>
+        <help>Enable this mapping.</help>
+    </field>
+    <field>
+        <id>mapping.host</id>
+        <label>Host</label>
+        <type>text</type>
+        <help>The host name to answer for, such as router.lan. Subdomains of this name are answered as well.</help>
+    </field>
+    <field>
+        <id>mapping.addresses</id>
+        <label>Addresses</label>
+        <type>text</type>
+        <help>Comma separated IPv4 or IPv6 addresses to answer with.</help>
+    </field>
+    <field>
+        <id>mapping.description</id>
+        <label>Description</label>
+        <type>text</type>
+        <help>Optional description for this entry.</help>
+    </field>
+</form>

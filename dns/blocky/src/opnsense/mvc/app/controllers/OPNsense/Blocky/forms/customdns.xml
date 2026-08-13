@@ -1,0 +1,19 @@
+<form>
+    <field>
+        <type>header</type>
+        <label>Custom DNS</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.customdns.custom_ttl</id>
+        <label>TTL</label>
+        <type>text</type>
+        <help>The TTL returned with locally answered names.</help>
+    </field>
+    <field>
+        <id>blocky.customdns.filter_unmapped_types</id>
+        <label>Filter Unmapped Types</label>
+        <type>checkbox</type>
+        <help>Answer with an empty result for record types that are not mapped, instead of asking an upstream resolver. Leave enabled unless a mapped name also needs records from the internet.</help>
+    </field>
+</form>

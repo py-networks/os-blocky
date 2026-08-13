@@ -85,6 +85,10 @@
                     <fast>Serve immediately, verify in background</fast>
                 </OptionValues>
             </init_strategy>
+            <user_agent type="TextField">
+                <Mask>/^[^\n\r]*$/</Mask>
+                <ValidationMessage>Enter a single line of text.</ValidationMessage>
+            </user_agent>
             <upstream type="ArrayField">
                 <enabled type="BooleanField">
                     <Default>1</Default>
@@ -104,5 +108,465 @@
                 <description type="DescriptionField"/>
             </upstream>
         </upstreams>
+        <blocking>
+            <block_type type="TextField">
+                <Default>zeroIp</Default>
+                <Required>Y</Required>
+                <Mask>/^(zeroIp|nxDomain|([0-9a-fA-F:.]+)(\s*,\s*[0-9a-fA-F:.]+)*)$/</Mask>
+                <ValidationMessage>Use zeroIp, nxDomain, or a comma separated list of IP addresses to answer with.</ValidationMessage>
+            </block_type>
+            <block_ttl type="TextField">
+                <Default>6h</Default>
+                <Required>Y</Required>
+                <Mask>/^([0-9]+(ms|s|m|h))+$/</Mask>
+                <ValidationMessage>Enter a duration such as 30m or 6h.</ValidationMessage>
+            </block_ttl>
+            <refresh_period type="TextField">
+                <Default>4h</Default>
+                <Required>Y</Required>
+                <Mask>/^([0-9]+(ms|s|m|h))+$/</Mask>
+                <ValidationMessage>Enter a duration such as 4h. Use 0s to disable periodic refresh.</ValidationMessage>
+            </refresh_period>
+            <loading_strategy type="OptionField">
+                <Default>blocking</Default>
+                <Required>Y</Required>
+                <OptionValues>
+                    <blocking>Wait for lists before serving</blocking>
+                    <failOnError>Abort startup when a list fails</failOnError>
+                    <fast>Serve immediately, load in background</fast>
+                </OptionValues>
+            </loading_strategy>
+            <concurrency type="IntegerField">
+                <Default>4</Default>
+                <Required>Y</Required>
+                <MinimumValue>1</MinimumValue>
+                <MaximumValue>64</MaximumValue>
+                <ValidationMessage>Enter a number between 1 and 64.</ValidationMessage>
+            </concurrency>
+            <max_errors_per_source type="IntegerField">
+                <Default>5</Default>
+                <Required>Y</Required>
+                <MinimumValue>-1</MinimumValue>
+                <ValidationMessage>Enter the number of tolerated parse errors, or -1 for unlimited.</ValidationMessage>
+            </max_errors_per_source>
+            <download_timeout type="TextField">
+                <Default>60s</Default>
+                <Required>Y</Required>
+                <Mask>/^([0-9]+(ms|s|m|h))+$/</Mask>
+                <ValidationMessage>Enter a duration such as 60s.</ValidationMessage>
+            </download_timeout>
+            <download_attempts type="IntegerField">
+                <Default>3</Default>
+                <Required>Y</Required>
+                <MinimumValue>1</MinimumValue>
+                <MaximumValue>20</MaximumValue>
+                <ValidationMessage>Enter a number between 1 and 20.</ValidationMessage>
+            </download_attempts>
+            <download_cooldown type="TextField">
+                <Default>1s</Default>
+                <Required>Y</Required>
+                <Mask>/^([0-9]+(ms|s|m|h))+$/</Mask>
+                <ValidationMessage>Enter a duration such as 1s.</ValidationMessage>
+            </download_cooldown>
+            <cache_downloads type="BooleanField">
+                <Default>1</Default>
+                <Required>Y</Required>
+            </cache_downloads>
+            <denylist type="ArrayField">
+                <enabled type="BooleanField">
+                    <Default>1</Default>
+                    <Required>Y</Required>
+                </enabled>
+                <group type="TextField">
+                    <Default>ads</Default>
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-zA-Z_.\-]+$/</Mask>
+                    <ValidationMessage>A group name may only contain letters, digits, dots, underscores and hyphens.</ValidationMessage>
+                </group>
+                <source_type type="OptionField">
+                    <Default>url</Default>
+                    <Required>Y</Required>
+                    <OptionValues>
+                        <url>Download from URL</url>
+                        <file>Read from local file</file>
+                        <inline>Entered below</inline>
+                    </OptionValues>
+                </source_type>
+                <source type="TextField">
+                    <Mask>/^[^\s]*$/</Mask>
+                    <ValidationMessage>Enter a URL or an absolute path without spaces.</ValidationMessage>
+                </source>
+                <content type="TextField"/>
+                <description type="DescriptionField"/>
+            </denylist>
+            <allowlist type="ArrayField">
+                <enabled type="BooleanField">
+                    <Default>1</Default>
+                    <Required>Y</Required>
+                </enabled>
+                <group type="TextField">
+                    <Default>ads</Default>
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-zA-Z_.\-]+$/</Mask>
+                    <ValidationMessage>A group name may only contain letters, digits, dots, underscores and hyphens.</ValidationMessage>
+                </group>
+                <source_type type="OptionField">
+                    <Default>inline</Default>
+                    <Required>Y</Required>
+                    <OptionValues>
+                        <url>Download from URL</url>
+                        <file>Read from local file</file>
+                        <inline>Entered below</inline>
+                    </OptionValues>
+                </source_type>
+                <source type="TextField">
+                    <Mask>/^[^\s]*$/</Mask>
+                    <ValidationMessage>Enter a URL or an absolute path without spaces.</ValidationMessage>
+                </source>
+                <content type="TextField"/>
+                <description type="DescriptionField"/>
+            </allowlist>
+        </blocking>
+        <clientgroups>
+            <clientgroup type="ArrayField">
+                <enabled type="BooleanField">
+                    <Default>1</Default>
+                    <Required>Y</Required>
+                </enabled>
+                <client type="TextField">
+                    <Default>default</Default>
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-zA-Z_.:\-\/\*\[\]]+$/</Mask>
+                    <ValidationMessage>Enter default, a client name, an IP address, or a CIDR range. Wildcards are allowed in names.</ValidationMessage>
+                </client>
+                <groups type="CSVListField">
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-zA-Z_.\-]+$/</Mask>
+                    <MaskPerItem>Y</MaskPerItem>
+                    <ValidationMessage>Enter one or more list group names.</ValidationMessage>
+                </groups>
+                <description type="DescriptionField"/>
+            </clientgroup>
+        </clientgroups>
+        <schedules>
+            <schedule type="ArrayField">
+                <enabled type="BooleanField">
+                    <Default>1</Default>
+                    <Required>Y</Required>
+                </enabled>
+                <name type="TextField">
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-zA-Z_.\-]+$/</Mask>
+                    <ValidationMessage>A schedule name may only contain letters, digits, dots, underscores and hyphens.</ValidationMessage>
+                </name>
+                <weekdays type="OptionField">
+                    <Required>Y</Required>
+                    <Multiple>Y</Multiple>
+                    <OptionValues>
+                        <mon>Monday</mon>
+                        <tue>Tuesday</tue>
+                        <wed>Wednesday</wed>
+                        <thu>Thursday</thu>
+                        <fri>Friday</fri>
+                        <sat>Saturday</sat>
+                        <sun>Sunday</sun>
+                    </OptionValues>
+                </weekdays>
+                <start type="TextField">
+                    <Required>Y</Required>
+                    <Mask>/^([01][0-9]|2[0-3]):[0-5][0-9]$/</Mask>
+                    <ValidationMessage>Enter a time of day as HH:MM.</ValidationMessage>
+                </start>
+                <end type="TextField">
+                    <Required>Y</Required>
+                    <Mask>/^([01][0-9]|2[0-3]):[0-5][0-9]$/</Mask>
+                    <ValidationMessage>Enter a time of day as HH:MM.</ValidationMessage>
+                </end>
+                <description type="DescriptionField"/>
+            </schedule>
+            <listschedule type="ArrayField">
+                <enabled type="BooleanField">
+                    <Default>1</Default>
+                    <Required>Y</Required>
+                </enabled>
+                <group type="TextField">
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-zA-Z_.\-]+$/</Mask>
+                    <ValidationMessage>A group name may only contain letters, digits, dots, underscores and hyphens.</ValidationMessage>
+                </group>
+                <schedules type="CSVListField">
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-zA-Z_.\-]+$/</Mask>
+                    <MaskPerItem>Y</MaskPerItem>
+                    <ValidationMessage>Enter one or more schedule names.</ValidationMessage>
+                </schedules>
+                <description type="DescriptionField"/>
+            </listschedule>
+        </schedules>
+        <customdns>
+            <custom_ttl type="TextField">
+                <Default>1h</Default>
+                <Required>Y</Required>
+                <Mask>/^([0-9]+(ms|s|m|h))+$/</Mask>
+                <ValidationMessage>Enter a duration such as 1h.</ValidationMessage>
+            </custom_ttl>
+            <filter_unmapped_types type="BooleanField">
+                <Default>1</Default>
+                <Required>Y</Required>
+            </filter_unmapped_types>
+            <rewrite type="ArrayField">
+                <enabled type="BooleanField">
+                    <Default>1</Default>
+                    <Required>Y</Required>
+                </enabled>
+                <from type="TextField">
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-zA-Z_.\-]+$/</Mask>
+                    <ValidationMessage>Enter the domain suffix to rewrite.</ValidationMessage>
+                </from>
+                <to type="TextField">
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-zA-Z_.\-]+$/</Mask>
+                    <ValidationMessage>Enter the domain suffix to rewrite to.</ValidationMessage>
+                </to>
+                <description type="DescriptionField"/>
+            </rewrite>
+            <mapping type="ArrayField">
+                <enabled type="BooleanField">
+                    <Default>1</Default>
+                    <Required>Y</Required>
+                </enabled>
+                <host type="TextField">
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-zA-Z_.\-]+$/</Mask>
+                    <ValidationMessage>Enter a host name such as router.lan.</ValidationMessage>
+                </host>
+                <addresses type="CSVListField">
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-fA-F:.]+$/</Mask>
+                    <MaskPerItem>Y</MaskPerItem>
+                    <ValidationMessage>Enter one or more IP addresses.</ValidationMessage>
+                </addresses>
+                <description type="DescriptionField"/>
+            </mapping>
+        </customdns>
+        <conditional>
+            <fallback_upstream type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </fallback_upstream>
+            <mapping type="ArrayField">
+                <enabled type="BooleanField">
+                    <Default>1</Default>
+                    <Required>Y</Required>
+                </enabled>
+                <domain type="TextField">
+                    <Required>Y</Required>
+                    <Mask>/^[0-9a-zA-Z_.\-]*$/</Mask>
+                    <ValidationMessage>Enter a domain such as lan, or leave empty to match every otherwise unmatched query.</ValidationMessage>
+                </domain>
+                <resolvers type="CSVListField">
+                    <Required>Y</Required>
+                    <Mask>/^(tcp\+udp:|tcp:|udp:|tcp-tls:|quic:|https:\/\/)?[^\s,]+$/</Mask>
+                    <MaskPerItem>Y</MaskPerItem>
+                    <ValidationMessage>Enter one or more resolvers to forward this domain to.</ValidationMessage>
+                </resolvers>
+                <description type="DescriptionField"/>
+            </mapping>
+        </conditional>
+        <caching>
+            <min_time type="TextField">
+                <Default>0s</Default>
+                <Required>Y</Required>
+                <Mask>/^([0-9]+(ms|s|m|h))+$/</Mask>
+                <ValidationMessage>Enter a duration such as 5m. Use 0s to honour the upstream TTL.</ValidationMessage>
+            </min_time>
+            <max_time type="TextField">
+                <Default>0s</Default>
+                <Required>Y</Required>
+                <Mask>/^-?([0-9]+(ms|s|m|h))+$/</Mask>
+                <ValidationMessage>Enter a duration such as 30m. Use 0s for no cap, or -1s to disable caching.</ValidationMessage>
+            </max_time>
+            <max_items_count type="IntegerField">
+                <Default>0</Default>
+                <Required>Y</Required>
+                <MinimumValue>0</MinimumValue>
+                <ValidationMessage>Enter the maximum number of cached entries, or 0 for unlimited.</ValidationMessage>
+            </max_items_count>
+            <cache_time_negative type="TextField">
+                <Default>30m</Default>
+                <Required>Y</Required>
+                <Mask>/^-?([0-9]+(ms|s|m|h))+$/</Mask>
+                <ValidationMessage>Enter a duration such as 30m, or -1s to disable negative caching.</ValidationMessage>
+            </cache_time_negative>
+            <prefetching type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </prefetching>
+            <prefetch_expires type="TextField">
+                <Default>2h</Default>
+                <Required>Y</Required>
+                <Mask>/^([0-9]+(ms|s|m|h))+$/</Mask>
+                <ValidationMessage>Enter a duration such as 2h.</ValidationMessage>
+            </prefetch_expires>
+            <prefetch_threshold type="IntegerField">
+                <Default>5</Default>
+                <Required>Y</Required>
+                <MinimumValue>0</MinimumValue>
+                <ValidationMessage>Enter the number of queries after which a domain is prefetched.</ValidationMessage>
+            </prefetch_threshold>
+            <prefetch_max_items_count type="IntegerField">
+                <Default>0</Default>
+                <Required>Y</Required>
+                <MinimumValue>0</MinimumValue>
+                <ValidationMessage>Enter the maximum number of prefetched domains, or 0 for unlimited.</ValidationMessage>
+            </prefetch_max_items_count>
+        </caching>
+        <querylog>
+            <type type="OptionField">
+                <Default>none</Default>
+                <Required>Y</Required>
+                <OptionValues>
+                    <none>Disabled</none>
+                    <console>Service log</console>
+                    <csv>File, one per day</csv>
+                    <csv-client>File, one per day and client</csv-client>
+                </OptionValues>
+            </type>
+            <log_retention_days type="IntegerField">
+                <Default>7</Default>
+                <Required>Y</Required>
+                <MinimumValue>0</MinimumValue>
+                <ValidationMessage>Enter the number of days to keep, or 0 to keep forever.</ValidationMessage>
+            </log_retention_days>
+            <flush_interval type="TextField">
+                <Default>30s</Default>
+                <Required>Y</Required>
+                <Mask>/^([0-9]+(ms|s|m|h))+$/</Mask>
+                <ValidationMessage>Enter a duration such as 30s.</ValidationMessage>
+            </flush_interval>
+            <fields type="OptionField">
+                <Default>clientIP,clientName,responseReason,responseAnswer,question,duration</Default>
+                <Required>Y</Required>
+                <Multiple>Y</Multiple>
+                <OptionValues>
+                    <clientIP>Client IP address</clientIP>
+                    <clientName>Client name</clientName>
+                    <responseReason>Response reason</responseReason>
+                    <responseAnswer>Response answer</responseAnswer>
+                    <question>Question</question>
+                    <duration>Duration</duration>
+                </OptionValues>
+            </fields>
+        </querylog>
+        <encryption>
+            <tls_port type="CSVListField">
+                <Mask>/^(\[[0-9a-fA-F:.]+\]:|[0-9a-zA-Z.\-]+:|:)?[0-9]{1,5}$/</Mask>
+                <MaskPerItem>Y</MaskPerItem>
+                <ValidationMessage>Use a port number, or an address and port such as 192.168.1.1:853.</ValidationMessage>
+            </tls_port>
+            <https_port type="CSVListField">
+                <Mask>/^(\[[0-9a-fA-F:.]+\]:|[0-9a-zA-Z.\-]+:|:)?[0-9]{1,5}$/</Mask>
+                <MaskPerItem>Y</MaskPerItem>
+                <ValidationMessage>Use a port number, or an address and port such as 192.168.1.1:443.</ValidationMessage>
+            </https_port>
+            <doh_path type="TextField">
+                <Default>/dns-query</Default>
+                <Required>Y</Required>
+                <Mask>/^\/[0-9a-zA-Z_.\-\/]*$/</Mask>
+                <ValidationMessage>Enter a URL path starting with a slash.</ValidationMessage>
+            </doh_path>
+            <certificate type="CertificateField">
+                <Type>cert</Type>
+                <BlankDesc>Self-signed</BlankDesc>
+            </certificate>
+            <min_tls_version type="OptionField">
+                <Default>1.2</Default>
+                <Required>Y</Required>
+                <OptionValues>
+                    <_1.0 value="1.0">TLS 1.0</_1.0>
+                    <_1.1 value="1.1">TLS 1.1</_1.1>
+                    <_1.2 value="1.2">TLS 1.2</_1.2>
+                    <_1.3 value="1.3">TLS 1.3</_1.3>
+                </OptionValues>
+            </min_tls_version>
+            <http3 type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </http3>
+        </encryption>
+        <advanced>
+            <hosts_file_sources type="CSVListField">
+                <Mask>/^[^\s,]+$/</Mask>
+                <MaskPerItem>Y</MaskPerItem>
+                <ValidationMessage>Enter one or more file paths or URLs.</ValidationMessage>
+            </hosts_file_sources>
+            <hosts_ttl type="TextField">
+                <Default>1h</Default>
+                <Required>Y</Required>
+                <Mask>/^([0-9]+(ms|s|m|h))+$/</Mask>
+                <ValidationMessage>Enter a duration such as 1h.</ValidationMessage>
+            </hosts_ttl>
+            <hosts_filter_loopback type="BooleanField">
+                <Default>1</Default>
+                <Required>Y</Required>
+            </hosts_filter_loopback>
+            <client_lookup_upstream type="TextField">
+                <Mask>/^[^\s]*$/</Mask>
+                <ValidationMessage>Enter the resolver used to look up client names by reverse DNS.</ValidationMessage>
+            </client_lookup_upstream>
+            <filter_query_types type="OptionField">
+                <Multiple>Y</Multiple>
+                <OptionValues>
+                    <A/>
+                    <AAAA/>
+                    <HTTPS/>
+                    <SVCB/>
+                    <MX/>
+                    <PTR/>
+                    <SRV/>
+                    <TXT/>
+                </OptionValues>
+            </filter_query_types>
+            <fqdn_only type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </fqdn_only>
+            <ede type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </ede>
+            <ecs_use_as_client type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </ecs_use_as_client>
+            <ecs_forward type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </ecs_forward>
+            <special_use_domains type="BooleanField">
+                <Default>1</Default>
+                <Required>Y</Required>
+            </special_use_domains>
+            <dnssec_validate type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </dnssec_validate>
+            <rebinding_protection type="BooleanField">
+                <Default>0</Default>
+                <Required>Y</Required>
+            </rebinding_protection>
+            <rebinding_allowed_domains type="CSVListField">
+                <Mask>/^[0-9a-zA-Z_.\-]+$/</Mask>
+                <MaskPerItem>Y</MaskPerItem>
+                <ValidationMessage>Enter one or more domains that are allowed to resolve to private addresses.</ValidationMessage>
+            </rebinding_allowed_domains>
+            <rate_limit type="IntegerField">
+                <Default>0</Default>
+                <Required>Y</Required>
+                <MinimumValue>0</MinimumValue>
+                <ValidationMessage>Enter the number of queries per minute per client, or 0 to disable.</ValidationMessage>
+            </rate_limit>
+        </advanced>
     </items>
 </model>

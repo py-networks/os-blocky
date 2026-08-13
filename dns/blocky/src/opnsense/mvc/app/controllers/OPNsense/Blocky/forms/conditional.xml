@@ -1,0 +1,13 @@
+<form>
+    <field>
+        <type>header</type>
+        <label>Conditional Forwarding</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.conditional.fallback_upstream</id>
+        <label>Fall Back to Upstream</label>
+        <type>checkbox</type>
+        <help>When the resolver for a forwarded domain answers with an empty result, ask the normal upstream resolvers as well.</help>
+    </field>
+</form>

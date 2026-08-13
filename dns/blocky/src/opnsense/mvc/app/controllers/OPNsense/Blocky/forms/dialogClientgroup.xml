@@ -1,0 +1,31 @@
+<form>
+    <field>
+        <id>clientgroup.enabled</id>
+        <label>Enabled</label>
+        <type>checkbox</type>
+        <grid_view>
+            <width>6em</width>
+            <type>boolean</type>
+            <formatter>rowtoggle</formatter>
+        </grid_view>
+        <help>Enable this assignment.</help>
+    </field>
+    <field>
+        <id>clientgroup.client</id>
+        <label>Client</label>
+        <type>text</type>
+        <help>Which clients this applies to: the literal word default for everything not matched elsewhere, a client name (wildcards allowed), an IP address, or a CIDR range such as 192.168.20.0/24.</help>
+    </field>
+    <field>
+        <id>clientgroup.groups</id>
+        <label>List Groups</label>
+        <type>text</type>
+        <help>Comma separated list group names to apply to this client, matching the groups used on the Blocking tab.</help>
+    </field>
+    <field>
+        <id>clientgroup.description</id>
+        <label>Description</label>
+        <type>text</type>
+        <help>Optional description for this entry.</help>
+    </field>
+</form>

@@ -1,0 +1,45 @@
+<form>
+    <field>
+        <type>header</type>
+        <label>Encrypted DNS</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.encryption.tls_port</id>
+        <label>DoT Listen Address</label>
+        <type>text</type>
+        <help>Addresses and ports to serve DNS over TLS on, separated by commas. Leave empty to disable. The standard port is 853.</help>
+    </field>
+    <field>
+        <id>blocky.encryption.https_port</id>
+        <label>DoH Listen Address</label>
+        <type>text</type>
+        <help>Addresses and ports to serve DNS over HTTPS on, separated by commas. Leave empty to disable. The standard port is 443, which usually collides with the web interface.</help>
+    </field>
+    <field>
+        <id>blocky.encryption.doh_path</id>
+        <label>DoH Path</label>
+        <type>text</type>
+        <help>URL path the DNS over HTTPS endpoint is served on.</help>
+    </field>
+    <field>
+        <id>blocky.encryption.certificate</id>
+        <label>Certificate</label>
+        <type>dropdown</type>
+        <help>The certificate presented to clients. Without one blocky generates a self-signed certificate at startup, which most clients reject.</help>
+    </field>
+    <field>
+        <id>blocky.encryption.min_tls_version</id>
+        <label>Minimum TLS Version</label>
+        <type>dropdown</type>
+        <advanced>true</advanced>
+        <help>The oldest TLS version accepted from clients.</help>
+    </field>
+    <field>
+        <id>blocky.encryption.http3</id>
+        <label>Enable HTTP/3</label>
+        <type>checkbox</type>
+        <advanced>true</advanced>
+        <help>Also serve DNS over HTTP/3 on the DoH listener and advertise it to clients.</help>
+    </field>
+</form>

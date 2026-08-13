@@ -1,0 +1,118 @@
+<form>
+    <field>
+        <type>header</type>
+        <label>Hosts File</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.advanced.hosts_file_sources</id>
+        <label>Sources</label>
+        <type>text</type>
+        <help>Comma separated hosts files to answer from, for example /etc/hosts. Leave empty to disable.</help>
+    </field>
+    <field>
+        <id>blocky.advanced.hosts_ttl</id>
+        <label>TTL</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>The TTL returned with answers from a hosts file.</help>
+    </field>
+    <field>
+        <id>blocky.advanced.hosts_filter_loopback</id>
+        <label>Filter Loopback</label>
+        <type>checkbox</type>
+        <advanced>true</advanced>
+        <help>Ignore entries pointing at loopback addresses.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>Clients</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.advanced.client_lookup_upstream</id>
+        <label>Client Name Lookup</label>
+        <type>text</type>
+        <help>Resolver used to turn client IP addresses into names by reverse DNS, so that client names can be used in client groups and the query log. Usually the address of this firewall.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>Query Handling</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.advanced.filter_query_types</id>
+        <label>Drop Query Types</label>
+        <type>select_multiple</type>
+        <help>Record types answered with an empty result instead of being resolved. Selecting AAAA is the supported way to suppress IPv6 answers.</help>
+    </field>
+    <field>
+        <id>blocky.advanced.fqdn_only</id>
+        <label>FQDN Only</label>
+        <type>checkbox</type>
+        <help>Reject queries for names without a dot in them.</help>
+    </field>
+    <field>
+        <id>blocky.advanced.special_use_domains</id>
+        <label>Special Use Domains</label>
+        <type>checkbox</type>
+        <advanced>true</advanced>
+        <help>Answer reserved domains such as .invalid and .test locally as required by RFC 6761.</help>
+    </field>
+    <field>
+        <id>blocky.advanced.ede</id>
+        <label>Extended DNS Errors</label>
+        <type>checkbox</type>
+        <advanced>true</advanced>
+        <help>Attach a machine readable reason to blocked and failed answers.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>Security</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.advanced.dnssec_validate</id>
+        <label>Validate DNSSEC</label>
+        <type>checkbox</type>
+        <help>Verify DNSSEC signatures and refuse answers that fail validation. Adds latency and breaks resolution for misconfigured zones.</help>
+    </field>
+    <field>
+        <id>blocky.advanced.rebinding_protection</id>
+        <label>Rebinding Protection</label>
+        <type>checkbox</type>
+        <help>Discard answers from the internet that point at private addresses.</help>
+    </field>
+    <field>
+        <id>blocky.advanced.rebinding_allowed_domains</id>
+        <label>Rebinding Exceptions</label>
+        <type>text</type>
+        <help>Comma separated domains that are allowed to resolve to private addresses, such as plex.direct.</help>
+    </field>
+    <field>
+        <id>blocky.advanced.rate_limit</id>
+        <label>Rate Limit</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>Maximum queries per minute per client. Queries over the limit are dropped silently. Use 0 to disable.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>EDNS Client Subnet</label>
+        <static>true</static>
+    </field>
+    <field>
+        <id>blocky.advanced.ecs_use_as_client</id>
+        <label>Use as Client Address</label>
+        <type>checkbox</type>
+        <advanced>true</advanced>
+        <help>Treat the subnet supplied by the client as the client address when matching client groups.</help>
+    </field>
+    <field>
+        <id>blocky.advanced.ecs_forward</id>
+        <label>Forward to Upstream</label>
+        <type>checkbox</type>
+        <advanced>true</advanced>
+        <help>Pass the client subnet on to upstream resolvers.</help>
+    </field>
+</form>

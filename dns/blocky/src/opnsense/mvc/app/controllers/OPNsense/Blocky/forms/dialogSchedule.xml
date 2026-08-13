@@ -1,0 +1,43 @@
+<form>
+    <field>
+        <id>schedule.enabled</id>
+        <label>Enabled</label>
+        <type>checkbox</type>
+        <grid_view>
+            <width>6em</width>
+            <type>boolean</type>
+            <formatter>rowtoggle</formatter>
+        </grid_view>
+        <help>Enable this schedule.</help>
+    </field>
+    <field>
+        <id>schedule.name</id>
+        <label>Name</label>
+        <type>text</type>
+        <help>A name for this schedule, referenced from the list schedules below.</help>
+    </field>
+    <field>
+        <id>schedule.weekdays</id>
+        <label>Weekdays</label>
+        <type>select_multiple</type>
+        <help>The days this schedule is active on.</help>
+    </field>
+    <field>
+        <id>schedule.start</id>
+        <label>Start</label>
+        <type>text</type>
+        <help>Start time as HH:MM. A start later than the end wraps over midnight.</help>
+    </field>
+    <field>
+        <id>schedule.end</id>
+        <label>End</label>
+        <type>text</type>
+        <help>End time as HH:MM.</help>
+    </field>
+    <field>
+        <id>schedule.description</id>
+        <label>Description</label>
+        <type>text</type>
+        <help>Optional description for this entry.</help>
+    </field>
+</form>

@@ -35,10 +35,21 @@ class IndexController extends \OPNsense\Base\IndexController
 {
     public function indexAction()
     {
-        $this->view->generalForm = $this->getForm('general');
-        $this->view->upstreamForm = $this->getForm('upstreams');
-        $this->view->formDialogUpstream = $this->getForm('dialogUpstream');
-        $this->view->formGridUpstream = $this->getFormGrid('dialogUpstream');
+        foreach (['general', 'upstreams', 'blocking', 'customdns', 'conditional',
+                  'caching', 'querylog', 'encryption', 'advanced'] as $form) {
+            $this->view->setVar($form . 'Form', $this->getForm($form));
+        }
+
+        /*
+         * The grid id doubles as the API endpoint suffix in the view, so it is set explicitly
+         * rather than defaulting to the form name.
+         */
+        foreach (['Upstream', 'Denylist', 'Allowlist', 'Clientgroup', 'Schedule',
+                  'Listschedule', 'Mapping', 'Rewrite', 'Forward'] as $grid) {
+            $this->view->setVar('formDialog' . $grid, $this->getForm('dialog' . $grid));
+            $this->view->setVar('formGrid' . $grid, $this->getFormGrid('dialog' . $grid, strtolower($grid)));
+        }
+
         $this->view->pick('OPNsense/Blocky/index');
     }
 }

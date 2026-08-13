@@ -1,0 +1,31 @@
+<form>
+    <field>
+        <id>listschedule.enabled</id>
+        <label>Enabled</label>
+        <type>checkbox</type>
+        <grid_view>
+            <width>6em</width>
+            <type>boolean</type>
+            <formatter>rowtoggle</formatter>
+        </grid_view>
+        <help>Enable this assignment.</help>
+    </field>
+    <field>
+        <id>listschedule.group</id>
+        <label>List Group</label>
+        <type>text</type>
+        <help>The list group that is only active during the schedules below.</help>
+    </field>
+    <field>
+        <id>listschedule.schedules</id>
+        <label>Schedules</label>
+        <type>text</type>
+        <help>Comma separated schedule names. The group is active when any one of them matches.</help>
+    </field>
+    <field>
+        <id>listschedule.description</id>
+        <label>Description</label>
+        <type>text</type>
+        <help>Optional description for this entry.</help>
+    </field>
+</form>

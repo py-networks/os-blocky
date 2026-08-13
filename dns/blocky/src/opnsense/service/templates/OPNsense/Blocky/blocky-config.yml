@@ -22,7 +22,7 @@ upstreams:
 {% for group, addresses in ns.groups.items() %}
     {{ group }}:
 {% for address in addresses %}
-      - {{ address }}
+      - "{{ address }}"
 {% endfor %}
 {% endfor %}
 
@@ -32,16 +32,16 @@ connectIPVersion: {{ general.connect_ip_version }}
 {% if not helpers.empty('OPNsense.Blocky.general.bootstrap_dns') %}
 bootstrapDns:
 {% for resolver in general.bootstrap_dns.split(',') %}
-  - {{ resolver | trim }}
+  - "{{ resolver | trim }}"
 {% endfor %}
 
 {% endif %}
 ports:
   dns:
 {% for listener in general.listen_address.split(',') %}
-    - {{ listener | trim }}
+    - "{{ listener | trim }}"
 {% endfor %}
-  http: 127.0.0.1:{{ general.api_port }}
+  http: "127.0.0.1:{{ general.api_port }}"
 
 log:
   level: {{ general.log_level }}

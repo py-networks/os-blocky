@@ -2,3 +2,6 @@
 
 # The rc.conf.d fragment is generated from a template, so pkg does not track it.
 rm -f /etc/rc.conf.d/blocky_opn
+
+# Likewise the package repository registration, which the firmware hook writes at runtime.
+rm -f /usr/local/etc/pkg/repos/OsBlocky.conf /usr/local/etc/pkg/keys/os-blocky.pub

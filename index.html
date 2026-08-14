@@ -81,9 +81,9 @@ repository, so this repository provides both packages.
 </p>
 
 <pre><code>fetch -o /usr/local/etc/pkg/keys/os-blocky.pub \
-    https://pyarmak.github.io/os-blocky/os-blocky.pub
+    https://py-networks.github.io/os-blocky/os-blocky.pub
 fetch -o /usr/local/etc/pkg/repos/OsBlocky.conf \
-    https://pyarmak.github.io/os-blocky/OsBlocky.conf
+    https://py-networks.github.io/os-blocky/OsBlocky.conf
 pkg update
 pkg install os-blocky</code></pre>
 
@@ -104,8 +104,8 @@ Every build is also published as a GitHub release, so the packages can be instal
 that <code>blocky</code> must be installed first &mdash; it is a dependency of the plugin.
 </p>
 
-<pre><code>pkg add https://github.com/pyarmak/os-blocky/releases/download/latest/blocky.pkg
-pkg add https://github.com/pyarmak/os-blocky/releases/download/latest/os-blocky.pkg</code></pre>
+<pre><code>pkg add https://github.com/py-networks/os-blocky/releases/download/latest/blocky.pkg
+pkg add https://github.com/py-networks/os-blocky/releases/download/latest/os-blocky.pkg</code></pre>
 
 <div class="note">
 The plugin ships a firmware hook that writes <code>/usr/local/etc/pkg/repos/OsBlocky.conf</code> when
@@ -117,7 +117,7 @@ if you would rather manage updates by hand.
 
 <ul>
 <li>Target: OPNsense 26.7 (<code>FreeBSD:15:amd64</code>)</li>
-<li>Catalogue URL: <code>https://pyarmak.github.io/os-blocky/pkg/26.7/latest</code></li>
+<li>Catalogue URL: <code>https://py-networks.github.io/os-blocky/pkg/26.7/latest</code></li>
 <li>Signing: RSA, <code>signature_type: pubkey</code> &mdash; <a href="os-blocky.pub">os-blocky.pub</a></li>
 <li>Priority 5, below the OPNsense repository, so it can never shadow a core package</li>
 <li>Only the newest build of each package is kept in the catalogue; older builds stay available as release assets</li>
@@ -138,7 +138,7 @@ Unbound. To serve the network on port 53, move or disable Unbound first.
 </div>
 
 <footer>
-Source and issues: <a href="https://github.com/pyarmak/os-blocky">github.com/pyarmak/os-blocky</a>
+Source and issues: <a href="https://github.com/py-networks/os-blocky">github.com/py-networks/os-blocky</a>
 </footer>
 
 </body>

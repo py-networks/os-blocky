@@ -109,12 +109,14 @@ export default class BlockyStats extends BaseWidget {
                     {
                         label: this.translations.allowed,
                         data: allowed,
-                        backgroundColor: '#3c8dbc'
+                        backgroundColor: '#3c8dbc',
+                        maxBarThickness: 40
                     },
                     {
                         label: this.translations.blocked,
                         data: blocked,
-                        backgroundColor: '#d94f00'
+                        backgroundColor: '#d94f00',
+                        maxBarThickness: 40
                     }
                 ]
             },
@@ -126,7 +128,10 @@ export default class BlockyStats extends BaseWidget {
                     y: { stacked: true, beginAtZero: true }
                 },
                 plugins: {
-                    legend: { position: 'bottom' }
+                    legend: { position: 'bottom' },
+                    /* the dashboard loads chartjs-plugin-colorschemes, which would otherwise
+                       repaint both datasets from its palette and lose the allowed/blocked contrast */
+                    colorschemes: false
                 }
             }
         });

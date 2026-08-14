@@ -19,8 +19,10 @@
     <field>
         <id>forward.resolvers</id>
         <label>Resolvers</label>
-        <type>text</type>
-        <help>Comma separated resolvers to forward this domain to.</help>
+        <type>select_multiple</type>
+        <style>tokenize</style>
+        <allownew>true</allownew>
+        <help>Resolvers to forward this domain to.</help>
     </field>
     <field>
         <id>forward.description</id>

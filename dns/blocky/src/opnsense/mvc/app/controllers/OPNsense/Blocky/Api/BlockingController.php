@@ -49,7 +49,6 @@ class BlockingController extends ApiMutableModelControllerBase
      */
     private function apiCall($command, $params = [], $timeout = 120)
     {
-        $this->sessionClose();
         $backend = new Backend();
         $output = trim($backend->configdpRun('blocky ' . $command, $params, false, $timeout));
         $result = json_decode($output, true);

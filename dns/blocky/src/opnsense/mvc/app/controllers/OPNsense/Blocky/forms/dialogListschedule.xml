@@ -19,8 +19,10 @@
     <field>
         <id>listschedule.schedules</id>
         <label>Schedules</label>
-        <type>text</type>
-        <help>Comma separated schedule names. The group is active when any one of them matches.</help>
+        <type>select_multiple</type>
+        <style>tokenize</style>
+        <allownew>true</allownew>
+        <help>Schedule names. The group is active when any one of them matches.</help>
     </field>
     <field>
         <id>listschedule.description</id>

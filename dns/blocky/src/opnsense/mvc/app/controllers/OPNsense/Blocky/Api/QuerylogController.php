@@ -41,7 +41,6 @@ class QuerylogController extends ApiMutableModelControllerBase
 
     private function run($command, $params = [])
     {
-        $this->sessionClose();
         $output = trim((new Backend())->configdpRun('blocky ' . $command, $params));
         $result = json_decode($output, true);
 

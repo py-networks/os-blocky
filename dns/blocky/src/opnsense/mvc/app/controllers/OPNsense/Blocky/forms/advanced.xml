@@ -7,8 +7,10 @@
     <field>
         <id>blocky.advanced.hosts_file_sources</id>
         <label>Sources</label>
-        <type>text</type>
-        <help>Comma separated hosts files to answer from, for example /etc/hosts. Leave empty to disable.</help>
+        <type>select_multiple</type>
+        <style>tokenize</style>
+        <allownew>true</allownew>
+        <help>Hosts files to answer from, for example /etc/hosts. Leave empty to disable.</help>
     </field>
     <field>
         <id>blocky.advanced.hosts_ttl</id>
@@ -86,8 +88,10 @@
     <field>
         <id>blocky.advanced.rebinding_allowed_domains</id>
         <label>Rebinding Exceptions</label>
-        <type>text</type>
-        <help>Comma separated domains that are allowed to resolve to private addresses, such as plex.direct.</help>
+        <type>select_multiple</type>
+        <style>tokenize</style>
+        <allownew>true</allownew>
+        <help>Domains that are allowed to resolve to private addresses, such as plex.direct.</help>
     </field>
     <field>
         <id>blocky.advanced.rate_limit</id>

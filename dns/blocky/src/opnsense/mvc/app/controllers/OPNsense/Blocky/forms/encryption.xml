@@ -7,14 +7,18 @@
     <field>
         <id>blocky.encryption.tls_port</id>
         <label>DoT Listen Address</label>
-        <type>text</type>
-        <help>Addresses and ports to serve DNS over TLS on, separated by commas. Leave empty to disable. The standard port is 853.</help>
+        <type>select_multiple</type>
+        <style>tokenize</style>
+        <allownew>true</allownew>
+        <help>Addresses and ports to serve DNS over TLS on. Leave empty to disable. The standard port is 853.</help>
     </field>
     <field>
         <id>blocky.encryption.https_port</id>
         <label>DoH Listen Address</label>
-        <type>text</type>
-        <help>Addresses and ports to serve DNS over HTTPS on, separated by commas. Leave empty to disable. The standard port is 443, which usually collides with the web interface.</help>
+        <type>select_multiple</type>
+        <style>tokenize</style>
+        <allownew>true</allownew>
+        <help>Addresses and ports to serve DNS over HTTPS on. Leave empty to disable. The standard port is 443, which usually collides with the web interface.</help>
     </field>
     <field>
         <id>blocky.encryption.doh_path</id>

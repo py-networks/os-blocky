@@ -50,7 +50,6 @@ class ServiceController extends ApiMutableServiceControllerBase
      */
     public function validateAction()
     {
-        $this->sessionClose();
         $output = trim((new Backend())->configdRun('blocky validate'));
 
         return [

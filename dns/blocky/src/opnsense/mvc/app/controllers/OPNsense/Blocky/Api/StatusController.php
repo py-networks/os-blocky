@@ -47,7 +47,6 @@ class StatusController extends ApiMutableModelControllerBase
      */
     public function statsAction()
     {
-        $this->sessionClose();
         $output = trim((new Backend())->configdRun('blocky stats'));
         $result = json_decode($output, true);
 

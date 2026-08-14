@@ -161,9 +161,12 @@
             const filtered = perHour.map(function(row) { return row.filtered || 0; });
 
             const datasets = [
-                { label: "{{ lang._('Allowed') }}", data: queries, backgroundColor: '#3c8dbc' },
-                { label: "{{ lang._('Blocked') }}", data: blocked, backgroundColor: '#d9534f' },
-                { label: "{{ lang._('Filtered') }}", data: filtered, backgroundColor: '#f0ad4e' }
+                { label: "{{ lang._('Allowed') }}", data: queries,
+                  backgroundColor: '#3c8dbc', maxBarThickness: 40 },
+                { label: "{{ lang._('Blocked') }}", data: blocked,
+                  backgroundColor: '#d9534f', maxBarThickness: 40 },
+                { label: "{{ lang._('Filtered') }}", data: filtered,
+                  backgroundColor: '#f0ad4e', maxBarThickness: 40 }
             ];
 
             if (hourlyChart !== null) {
@@ -185,7 +188,11 @@
                         x: { stacked: true },
                         y: { stacked: true, beginAtZero: true }
                     },
-                    plugins: { legend: { position: 'bottom' } }
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        /* keep our own allowed/blocked/filtered colours */
+                        colorschemes: false
+                    }
                 }
             });
         }

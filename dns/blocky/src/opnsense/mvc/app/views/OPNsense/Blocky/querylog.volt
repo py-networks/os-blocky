@@ -46,8 +46,18 @@
             } else if (type === 'FILTERED' || type === 'NOTFQDN') {
                 style = 'warning';
             }
-            return '<span class="label label-' + style + '">' + esc(type || '-') + '</span> '
-                 + esc(row.reason || '');
+            /*
+             * The reason usually repeats the response type before its detail, as in
+             * "BLOCKED (ads: doubleclick.net)". The badge already carries the type, so only the
+             * detail is worth the column width.
+             */
+            let detail = row.reason || '';
+            if (type && detail.startsWith(type)) {
+                detail = detail.substring(type.length).trim();
+            }
+
+            return '<span class="label label-' + style + '">' + esc(type || '-') + '</span>'
+                 + (detail ? ' ' + esc(detail) : '');
         }
 
         const grid = $("#grid-querylog").UIBootgrid({
@@ -117,15 +127,15 @@
         <table id="grid-querylog" class="table table-condensed table-hover table-striped">
             <thead>
                 <tr>
-                    <th data-column-id="time" data-type="string" data-identifier="true">{{ lang._('Time') }}</th>
-                    <th data-column-id="client_ip" data-type="string">{{ lang._('Client') }}</th>
-                    <th data-column-id="client_name" data-type="string">{{ lang._('Name') }}</th>
+                    <th data-column-id="time" data-type="string" data-identifier="true" data-width="11em">{{ lang._('Time') }}</th>
+                    <th data-column-id="client_ip" data-type="string" data-width="9em">{{ lang._('Client') }}</th>
+                    <th data-column-id="client_name" data-type="string" data-width="9em" data-visible="false">{{ lang._('Name') }}</th>
                     <th data-column-id="question" data-type="string">{{ lang._('Question') }}</th>
-                    <th data-column-id="question_type" data-type="string">{{ lang._('Type') }}</th>
+                    <th data-column-id="question_type" data-type="string" data-width="5em">{{ lang._('Type') }}</th>
                     <th data-column-id="reason" data-type="string" data-formatter="reason">{{ lang._('Result') }}</th>
                     <th data-column-id="answer" data-type="string">{{ lang._('Answer') }}</th>
-                    <th data-column-id="response_code" data-type="string">{{ lang._('Code') }}</th>
-                    <th data-column-id="duration_ms" data-type="string">{{ lang._('ms') }}</th>
+                    <th data-column-id="response_code" data-type="string" data-width="7em">{{ lang._('Code') }}</th>
+                    <th data-column-id="duration_ms" data-type="string" data-width="4em">{{ lang._('ms') }}</th>
                 </tr>
             </thead>
             <tbody></tbody>

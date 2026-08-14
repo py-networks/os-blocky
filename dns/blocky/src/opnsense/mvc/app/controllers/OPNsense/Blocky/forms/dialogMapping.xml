@@ -19,8 +19,10 @@
     <field>
         <id>mapping.addresses</id>
         <label>Addresses</label>
-        <type>text</type>
-        <help>Comma separated IPv4 or IPv6 addresses to answer with.</help>
+        <type>select_multiple</type>
+        <style>tokenize</style>
+        <allownew>true</allownew>
+        <help>IPv4 or IPv6 addresses to answer with.</help>
     </field>
     <field>
         <id>mapping.description</id>

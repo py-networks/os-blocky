@@ -19,8 +19,10 @@
     <field>
         <id>clientgroup.groups</id>
         <label>List Groups</label>
-        <type>text</type>
-        <help>Comma separated list group names to apply to this client, matching the groups used on the Blocking tab.</help>
+        <type>select_multiple</type>
+        <style>tokenize</style>
+        <allownew>true</allownew>
+        <help>List group names to apply to this client, matching the groups used on the Blocking tab.</help>
     </field>
     <field>
         <id>clientgroup.description</id>

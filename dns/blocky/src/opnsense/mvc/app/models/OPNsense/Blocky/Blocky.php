@@ -94,8 +94,16 @@ class Blocky extends BaseModel
             }
         }
 
-        /* blocky requires a "default" upstream group, otherwise it refuses to start. */
-        if ($validateFullModel || $this->upstreams->upstream->isFieldChanged()) {
+        /*
+         * blocky requires a "default" upstream group, otherwise it refuses to start. The service
+         * can be switched on from a tab that does not touch the upstream grid at all, so this has
+         * to react to the enable flag changing as well as to the grid itself.
+         */
+        if (
+            $validateFullModel
+            || $this->general->enabled->isFieldChanged()
+            || $this->upstreams->upstream->isFieldChanged()
+        ) {
             $has_default = false;
             foreach ($this->upstreams->upstream->iterateItems() as $upstream) {
                 if ((string)$upstream->enabled === '1' && (string)$upstream->group === 'default') {

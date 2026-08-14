@@ -1,0 +1,314 @@
+name: build
+
+# Builds both packages in a FreeBSD 15.1 VM -- the ABI OPNsense 26.7 runs on -- and, when asked to
+# publish, signs a pkg catalogue and pushes it to the GitHub Pages branch alongside a release.
+# No event triggers this workflow directly; ci.yml and blocky-update.yml call it.
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to build. Defaults to the ref that triggered the caller.
+        type: string
+        required: false
+        default: ''
+      publish:
+        description: Publish to the pkg repository and refresh the rolling release.
+        type: boolean
+        required: false
+        default: false
+      release_tag:
+        description: Create an immutable release under this tag as well.
+        type: string
+        required: false
+        default: ''
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish to the pkg repository and refresh the rolling release
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+# Publishing rewrites a shared branch and moves a shared tag, so builds never overlap.
+concurrency:
+  group: os-blocky-build
+  cancel-in-progress: false
+
+jobs:
+  freebsd:
+    name: FreeBSD 15.1
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    env:
+      BLOCKY_PORT: /usr/ports/dns/blocky
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          # Scripts/version.sh runs `git rev-list ${VERSION}.. --count`, which a shallow clone
+          # cannot answer, and the plugin revision below is a commit count.
+          fetch-depth: 0
+
+      - name: Resolve versions
+        id: vars
+        run: |
+          set -eu
+          plugin_version="$(sed -n 's/^PLUGIN_VERSION=[[:space:]]*//p' dns/blocky/Makefile)"
+          # A monotonically increasing PORTREVISION, so that every push to main yields a package
+          # version pkg considers newer without hand-editing dns/blocky/Makefile.
+          plugin_revision="$(git rev-list --count HEAD)"
+          {
+            echo "blocky_version=$(sed -n 's/^DISTVERSION=[[:space:]]*//p' ports/dns/blocky/Makefile)"
+            echo "plugin_revision=${plugin_revision}"
+            echo "plugin_pkgversion=${plugin_version}_${plugin_revision}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Boot FreeBSD VM
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: "15.1"
+          # nfs shares the workspace live, so packages written inside the VM are visible to the
+          # publish steps below without a copy-back round trip per step.
+          sync: nfs
+          cache-after-prepare: true
+          # These names become SendEnv entries in the runner's ssh config, so every later
+          # `shell: freebsd {0}` step forwards whatever its own `env:` block sets for them.
+          envs: 'BLOCKY_PORT PLUGIN_REVISION PKG_REPO_KEY'
+          prepare: |
+            set -eu
+            # python312 rather than the newer 313 because py312-pycodestyle is the only flavour
+            # built for this pkg branch, and core's style.mk looks for pycodestyle-${PLUGIN_PYTHON}.
+            pkg install -y git gmake go126 ca_root_nss \
+                php85 php85-phar php85-tokenizer php85-xmlwriter php85-simplexml php85-dom \
+                python312 py312-pycodestyle
+            # Mk/defaults.mk probes this exact path to derive PLUGIN_PYTHON.
+            ln -sf /usr/local/bin/python3.12 /usr/local/bin/python3
+            # make style passes vacuously when phpcs is missing, so install it for real.
+            fetch -o /usr/local/bin/phpcs \
+                https://github.com/PHPCSStandards/PHP_CodeSniffer/releases/latest/download/phpcs.phar
+            fetch -o /usr/local/bin/phpcbf \
+                https://github.com/PHPCSStandards/PHP_CodeSniffer/releases/latest/download/phpcbf.phar
+            chmod +x /usr/local/bin/phpcs /usr/local/bin/phpcbf
+            git config --global --add safe.directory '*'
+            # Only the ports *framework* -- the dns/blocky port itself is vendored in this repo.
+            # This checkout is around 270K, against roughly a gigabyte for the whole tree.
+            git clone --depth 1 --filter=blob:none --no-checkout \
+                https://github.com/opnsense/ports /usr/ports
+            cd /usr/ports
+            git sparse-checkout set --no-cone Mk Keywords Templates Tools GIDs UIDs
+            git checkout
+            # lint.mk, style.mk and sweep.mk .-include ${PLUGINSDIR}/../core/Mk/*.mk.
+            git clone --depth 1 -b stable/26.7 https://github.com/opnsense/core /usr/core
+
+      - name: Build the blocky package
+        shell: freebsd {0}
+        run: |
+          set -eu
+          rm -rf "$BLOCKY_PORT"
+          mkdir -p "$(dirname "$BLOCKY_PORT")"
+          cp -R "$GITHUB_WORKSPACE/ports/dns/blocky" "$BLOCKY_PORT"
+          # Regenerate distinfo unconditionally: the version checker bumps DISTVERSION without it.
+          make -C "$BLOCKY_PORT" makesum
+          make -C "$BLOCKY_PORT" package
+          # plugins.mk's manifest target runs `pkg query` against every PLUGIN_DEPENDS entry, so
+          # blocky has to be installed before the plugin can be packaged.
+          pkg add -f "$BLOCKY_PORT"/work/pkg/blocky-*.pkg
+          cp "$BLOCKY_PORT/distinfo" "$GITHUB_WORKSPACE/ports/dns/blocky/distinfo"
+
+      - name: Build the plugin package
+        shell: freebsd {0}
+        env:
+          PLUGIN_REVISION: ${{ steps.vars.outputs.plugin_revision }}
+        run: |
+          set -eu
+          # Mk/*.mk resolve core relative to PLUGINSDIR, which is the workspace root.
+          ln -sfn /usr/core "$(dirname "$GITHUB_WORKSPACE")/core"
+          cd "$GITHUB_WORKSPACE/dns/blocky"
+          make PLUGIN_REVISION="$PLUGIN_REVISION" lint
+          make PLUGIN_REVISION="$PLUGIN_REVISION" package
+
+      - name: Check code style
+        shell: freebsd {0}
+        env:
+          PLUGIN_REVISION: ${{ steps.vars.outputs.plugin_revision }}
+        run: |
+          set -eu
+          cd "$GITHUB_WORKSPACE/dns/blocky"
+          # core's style target swallows its own exit status and only prints counts, so the
+          # gate has to live here. PAGER=cat keeps it from invoking less on a non-tty.
+          make PAGER=cat PLUGIN_REVISION="$PLUGIN_REVISION" style > /tmp/style.out 2>&1
+          cat /tmp/style.out
+          if grep -q '| ERROR' /tmp/style.out; then
+              echo "phpcs reported errors" >&2
+              exit 1
+          fi
+          if grep -Eq '\.py:[0-9]+:[0-9]+: [EW][0-9]+' /tmp/style.out; then
+              echo "pycodestyle reported problems" >&2
+              exit 1
+          fi
+
+      - name: Check the plugin manifest
+        shell: freebsd {0}
+        run: |
+          set -eu
+          pkg="$(ls "$GITHUB_WORKSPACE"/dns/blocky/work/pkg/os-blocky-*.pkg)"
+          # Deliberately not `pkg add`: the plugin's +POST_INSTALL calls configctl and
+          # opnsense-version, neither of which exists outside OPNsense.
+          pkg info -F "$pkg"
+          pkg info -dF "$pkg" | grep -q 'blocky-' \
+              || { echo "the blocky dependency is missing from the manifest" >&2; exit 1; }
+          pkg info -AF "$pkg" | grep -q 'product_abi.*26\.7' \
+              || { echo "product_abi is not 26.7" >&2; exit 1; }
+          # plugins.mk wires src/opnsense/scripts/firmware/repos/* into +POST_INSTALL, which is
+          # what makes an installed plugin subscribe the firewall to this repository.
+          tar -xOf "$pkg" +MANIFEST | grep -q 'firmware/repos/OsBlocky.php' \
+              || { echo "the repository hook is not wired into +POST_INSTALL" >&2; exit 1; }
+
+      - name: Sign the package catalogue
+        shell: freebsd {0}
+        env:
+          PKG_REPO_KEY: ${{ secrets.PKG_REPO_KEY }}
+        run: |
+          set -eu
+          if [ -z "${PKG_REPO_KEY:-}" ]; then
+              echo "PKG_REPO_KEY is not set; the catalogue would be unsigned" >&2
+              exit 1
+          fi
+          dist="$GITHUB_WORKSPACE/dist"
+          rm -rf "$dist"
+          mkdir -p "$dist/All"
+          cp "$BLOCKY_PORT"/work/pkg/blocky-*.pkg "$dist/All/"
+          cp "$GITHUB_WORKSPACE"/dns/blocky/work/pkg/os-blocky-*.pkg "$dist/All/"
+          # Kept outside the workspace so the private key never touches the shared NFS mount.
+          key=/root/pkg-repo.key
+          printf '%s\n' "$PKG_REPO_KEY" > "$key"
+          chmod 400 "$key"
+          pkg repo "$dist" "rsa:$key"
+          rm -f "$key"
+          ls -l "$dist" "$dist/All"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ steps.vars.outputs.blocky_version }}-${{ steps.vars.outputs.plugin_pkgversion }}
+          path: dist/
+          retention-days: 14
+
+      - name: Stage release assets
+        if: inputs.publish
+        env:
+          BLOCKY_VERSION: ${{ steps.vars.outputs.blocky_version }}
+          PLUGIN_PKGVERSION: ${{ steps.vars.outputs.plugin_pkgversion }}
+        run: |
+          set -eu
+          rm -rf release && mkdir release
+          cp dist/All/blocky-*.pkg "release/blocky-${BLOCKY_VERSION}.pkg"
+          cp dist/All/os-blocky-*.pkg "release/os-blocky-${PLUGIN_PKGVERSION}.pkg"
+          # Stable aliases so the documented sideload URLs never change.
+          cp dist/All/blocky-*.pkg release/blocky.pkg
+          cp dist/All/os-blocky-*.pkg release/os-blocky.pkg
+          ls -l release
+
+      - name: Publish the package repository
+        if: inputs.publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BLOCKY_VERSION: ${{ steps.vars.outputs.blocky_version }}
+          PLUGIN_PKGVERSION: ${{ steps.vars.outputs.plugin_pkgversion }}
+        run: |
+          set -eu
+          work="$RUNNER_TEMP/gh-pages"
+          url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          rm -rf "$work"
+          if git clone --depth 1 --branch gh-pages "$url" "$work" 2>/dev/null; then
+              echo "updating the existing gh-pages branch"
+          else
+              echo "creating the gh-pages branch"
+              rm -rf "$work"
+              git init -b gh-pages "$work"
+              git -C "$work" remote add origin "$url"
+          fi
+
+          # Replace only this OPNsense version's subtree; other versions on the branch survive.
+          rm -rf "$work/pkg/26.7/latest"
+          mkdir -p "$work/pkg/26.7/latest"
+          cp -R dist/. "$work/pkg/26.7/latest/"
+          cp site/index.html site/OsBlocky.conf site/os-blocky.pub "$work/"
+          # Without this, Jekyll silently drops the catalogue files.
+          touch "$work/.nojekyll"
+
+          cd "$work"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+              echo "the published repository is already up to date"
+              exit 0
+          fi
+          git commit -m "Publish blocky ${BLOCKY_VERSION} and os-blocky ${PLUGIN_PKGVERSION}"
+          git push origin gh-pages
+
+      - name: Refresh the rolling release
+        if: inputs.publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BLOCKY_VERSION: ${{ steps.vars.outputs.blocky_version }}
+          PLUGIN_PKGVERSION: ${{ steps.vars.outputs.plugin_pkgversion }}
+        run: |
+          set -eu
+          cat > "$RUNNER_TEMP/notes.md" <<NOTES
+          blocky \`${BLOCKY_VERSION}\`, os-blocky \`${PLUGIN_PKGVERSION}\`, built from \`${GITHUB_SHA}\`.
+
+          Sideload on an OPNsense 26.7 firewall:
+
+          \`\`\`
+          pkg add https://github.com/${GITHUB_REPOSITORY}/releases/download/latest/blocky.pkg
+          pkg add https://github.com/${GITHUB_REPOSITORY}/releases/download/latest/os-blocky.pkg
+          \`\`\`
+
+          Or subscribe to the package repository instead, which also handles upgrades:
+          <https://pyarmak.github.io/os-blocky/>
+          NOTES
+
+          gh release delete latest --yes --cleanup-tag 2>/dev/null || true
+          gh release create latest \
+              --target "$GITHUB_SHA" \
+              --title "Latest build" \
+              --notes-file "$RUNNER_TEMP/notes.md" \
+              release/*.pkg
+
+      - name: Create the tagged release
+        if: inputs.publish && inputs.release_tag != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -eu
+          gh release create "$RELEASE_TAG" --verify-tag --generate-notes \
+              --title "$RELEASE_TAG" release/*.pkg
+
+      - name: Commit the regenerated distinfo
+        if: inputs.publish && inputs.release_tag == ''
+        env:
+          BLOCKY_VERSION: ${{ steps.vars.outputs.blocky_version }}
+          TARGET_BRANCH: ${{ inputs.ref || 'main' }}
+        run: |
+          set -eu
+          if git diff --quiet -- ports/dns/blocky/distinfo; then
+              echo "distinfo is already current"
+              exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ports/dns/blocky/distinfo
+          git commit -m "Regenerate distinfo for blocky ${BLOCKY_VERSION}"
+          # Non-fatal: the packages are already published, and the next build regenerates this
+          # anyway. A push here only loses if the branch moved while the VM was building.
+          git push origin "HEAD:${TARGET_BRANCH}" \
+              || echo "::warning::could not push the regenerated distinfo to ${TARGET_BRANCH}"

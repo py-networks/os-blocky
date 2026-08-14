@@ -1,0 +1,85 @@
+name: blocky-update
+
+# Watches upstream blocky releases. The check itself costs a few seconds on a Linux runner; the
+# expensive FreeBSD build only runs when the version actually moved.
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Build even when blocky has not changed
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    name: Check for a new blocky release
+    runs-on: ubuntu-latest
+    outputs:
+      updated: ${{ steps.check.outputs.updated }}
+      version: ${{ steps.check.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - name: Compare against the vendored port
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -eu
+          current="$(sed -n 's/^DISTVERSION=[[:space:]]*//p' ports/dns/blocky/Makefile)"
+          latest="$(gh api repos/0xERR0R/blocky/releases/latest --jq .tag_name | sed 's/^v//')"
+          echo "vendored: ${current}, upstream: ${latest}"
+          echo "version=${latest}" >> "$GITHUB_OUTPUT"
+
+          if ! printf '%s' "$latest" | grep -Eq '^[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
+              echo "::error::upstream tag '${latest}' does not look like a version"
+              exit 1
+          fi
+
+          if [ "$current" = "$latest" ]; then
+              echo "already up to date"
+              echo "updated=${FORCE}" >> "$GITHUB_OUTPUT"
+              exit 0
+          fi
+
+          # Only ever move forward. A retracted or re-pointed upstream release must not be able to
+          # roll the vendored port backwards.
+          newest="$(printf '%s\n%s\n' "$current" "$latest" | sort -V | tail -1)"
+          if [ "$newest" != "$latest" ]; then
+              echo "::warning::upstream ${latest} is older than the vendored ${current}; ignoring"
+              echo "updated=${FORCE}" >> "$GITHUB_OUTPUT"
+              exit 0
+          fi
+
+          sed -i "s/^DISTVERSION=.*/DISTVERSION=\t${latest}/" ports/dns/blocky/Makefile
+          grep '^DISTVERSION=' ports/dns/blocky/Makefile
+
+          # distinfo is deliberately left stale here: only `make makesum` on FreeBSD can regenerate
+          # it, which the build workflow does unconditionally and then commits back.
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Update blocky to ${latest}" ports/dns/blocky/Makefile
+          git push origin HEAD:main
+          echo "updated=true" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build and publish
+    needs: check
+    if: needs.check.outputs.updated == 'true'
+    # Called directly rather than relying on the push above: pushes made with GITHUB_TOKEN do not
+    # trigger other workflows, so this is the one and only build per bump and needs no PAT.
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: main
+      publish: true
+    secrets: inherit

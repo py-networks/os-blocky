@@ -1,4 +1,6 @@
 work/
+dist/
+release/
 *.pkg
 *.orig
 *.rej

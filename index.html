@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>os-blocky &mdash; OPNsense package repository</title>
+<style>
+:root {
+    color-scheme: light dark;
+    --bg: #ffffff;
+    --fg: #1c1e21;
+    --muted: #5c6570;
+    --rule: #dfe3e8;
+    --code-bg: #f5f6f8;
+    --accent: #d94f00;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #16181c;
+        --fg: #e6e8ea;
+        --muted: #9aa4ae;
+        --rule: #2c3038;
+        --code-bg: #1e2127;
+        --accent: #ff8a3d;
+    }
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 5rem;
+    max-width: 46rem;
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+h1 { font-size: 1.9rem; margin: 0 0 .25rem; }
+h2 { font-size: 1.15rem; margin: 2.5rem 0 .75rem; padding-bottom: .3rem; border-bottom: 1px solid var(--rule); }
+h3 { font-size: 1rem; margin: 1.75rem 0 .5rem; }
+p.lead { color: var(--muted); margin: 0 0 2rem; }
+a { color: var(--accent); }
+code {
+    background: var(--code-bg);
+    padding: .1em .35em;
+    border-radius: 3px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .875em;
+}
+pre {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: .9rem 1rem;
+    overflow-x: auto;
+}
+pre code { background: none; padding: 0; font-size: .8125rem; }
+ul { padding-left: 1.25rem; }
+.note {
+    border-left: 3px solid var(--accent);
+    background: var(--code-bg);
+    padding: .75rem 1rem;
+    border-radius: 0 4px 4px 0;
+    margin: 1.25rem 0;
+}
+footer { margin-top: 4rem; padding-top: 1rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: .875rem; }
+</style>
+</head>
+<body>
+
+<h1>os-blocky</h1>
+<p class="lead">
+An OPNsense plugin for <a href="https://github.com/0xERR0R/blocky">blocky</a>, a DNS proxy and
+ad-blocker. This page is also the signed <code>pkg</code> repository that serves the plugin and
+the <code>blocky</code> package it depends on.
+</p>
+
+<h2>Install from this repository</h2>
+
+<p>
+On the firewall, as <code>root</code>. <code>blocky</code> is not in the OPNsense package
+repository, so this repository provides both packages.
+</p>
+
+<pre><code>fetch -o /usr/local/etc/pkg/keys/os-blocky.pub \
+    https://pyarmak.github.io/os-blocky/os-blocky.pub
+fetch -o /usr/local/etc/pkg/repos/OsBlocky.conf \
+    https://pyarmak.github.io/os-blocky/OsBlocky.conf
+pkg update
+pkg install os-blocky</code></pre>
+
+<p>
+<code>pkg update</code> should report the <code>OsBlocky</code> repository as signed and trusted. If
+it says <em>unsigned</em>, the public key is not where the repository configuration expects it.
+</p>
+
+<p>
+From then on the plugin appears under <strong>System &rarr; Firmware &rarr; Plugins</strong>
+alongside the official ones and upgrades with the rest of the system.
+</p>
+
+<h2>Install without adding the repository</h2>
+
+<p>
+Every build is also published as a GitHub release, so the packages can be installed directly. Note
+that <code>blocky</code> must be installed first &mdash; it is a dependency of the plugin.
+</p>
+
+<pre><code>pkg add https://github.com/pyarmak/os-blocky/releases/download/latest/blocky.pkg
+pkg add https://github.com/pyarmak/os-blocky/releases/download/latest/os-blocky.pkg</code></pre>
+
+<div class="note">
+The plugin ships a firmware hook that writes <code>/usr/local/etc/pkg/repos/OsBlocky.conf</code> when
+it is installed, so even a sideloaded install ends up subscribed to this repository. Delete that file
+if you would rather manage updates by hand.
+</div>
+
+<h2>Repository details</h2>
+
+<ul>
+<li>Target: OPNsense 26.7 (<code>FreeBSD:15:amd64</code>)</li>
+<li>Catalogue URL: <code>https://pyarmak.github.io/os-blocky/pkg/26.7/latest</code></li>
+<li>Signing: RSA, <code>signature_type: pubkey</code> &mdash; <a href="os-blocky.pub">os-blocky.pub</a></li>
+<li>Priority 5, below the OPNsense repository, so it can never shadow a core package</li>
+<li>Only the newest build of each package is kept in the catalogue; older builds stay available as release assets</li>
+</ul>
+
+<h2>What the plugin provides</h2>
+
+<ul>
+<li><strong>Services &rarr; Blocky &rarr; Settings</strong> &mdash; the full blocky configuration across eleven tabs</li>
+<li><strong>Status</strong> &mdash; blocking state with auto re-enable countdown, 24 hour statistics, and a lookup tool</li>
+<li><strong>Query Log</strong> &mdash; browser for blocky's per-query logs</li>
+<li>Two dashboard widgets, service integration, and the service log in the standard log viewer</li>
+</ul>
+
+<div class="note">
+The plugin listens on port <strong>5300</strong> by default so a fresh install cannot collide with
+Unbound. To serve the network on port 53, move or disable Unbound first.
+</div>
+
+<footer>
+Source and issues: <a href="https://github.com/pyarmak/os-blocky">github.com/pyarmak/os-blocky</a>
+</footer>
+
+</body>
+</html>

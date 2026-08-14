@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# A pkg upgrade deletes the old package first, and +PRE_DEINSTALL stops the daemon, so without this
+# an upgrade would leave DNS down until the next reboot or a manual apply. This runs after the
+# generated section above has rewritten blocky-config.yml and /etc/rc.conf.d/blocky_opn, and rc.subr
+# makes it a no-op while the plugin is disabled.
+if [ -f /usr/local/sbin/configctl ]; then
+	echo -n "Starting blocky: "
+	/usr/local/sbin/configctl blocky restart
+fi

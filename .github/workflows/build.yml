@@ -126,6 +126,12 @@ jobs:
           PLUGIN_REVISION: ${{ steps.vars.outputs.plugin_revision }}
         run: |
           set -eu
+          # Reaching the VM depends on the SendEnv wiring above. An empty value here would still
+          # build, but would produce an unversioned package that pkg never offers as an upgrade.
+          if [ -z "${PLUGIN_REVISION:-}" ]; then
+              echo "PLUGIN_REVISION did not reach the VM" >&2
+              exit 1
+          fi
           # Mk/*.mk resolve core relative to PLUGINSDIR, which is the workspace root.
           ln -sfn /usr/core "$(dirname "$GITHUB_WORKSPACE")/core"
           cd "$GITHUB_WORKSPACE/dns/blocky"

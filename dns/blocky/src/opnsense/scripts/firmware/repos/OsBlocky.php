@@ -67,7 +67,7 @@ EOKEY;
 /* Priority stays below the OPNsense repository (11) so this one can never shadow a core package. */
 $repo_conf = <<<EOCONF
 OsBlocky: {
-  url: "https://pyarmak.github.io/os-blocky/pkg/26.7/latest",
+  url: "https://py-networks.github.io/os-blocky/pkg/26.7/latest",
   signature_type: "pubkey",
   pubkey: "{$key_file}",
   priority: 5,

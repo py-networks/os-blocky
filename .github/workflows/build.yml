@@ -279,7 +279,7 @@ jobs:
           \`\`\`
 
           Or subscribe to the package repository instead, which also handles upgrades:
-          <https://pyarmak.github.io/os-blocky/>
+          <https://py-networks.github.io/os-blocky/>
           NOTES
 
           gh release delete latest --yes --cleanup-tag 2>/dev/null || true

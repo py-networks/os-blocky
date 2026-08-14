@@ -30,9 +30,9 @@ On the firewall, as `root`:
 
 ```sh
 fetch -o /usr/local/etc/pkg/keys/os-blocky.pub \
-    https://pyarmak.github.io/os-blocky/os-blocky.pub
+    https://py-networks.github.io/os-blocky/os-blocky.pub
 fetch -o /usr/local/etc/pkg/repos/OsBlocky.conf \
-    https://pyarmak.github.io/os-blocky/OsBlocky.conf
+    https://py-networks.github.io/os-blocky/OsBlocky.conf
 pkg update
 pkg install os-blocky
 ```
@@ -49,8 +49,8 @@ shadow a core package.
 Every build is also published as a GitHub release. blocky must go first — it is a dependency.
 
 ```sh
-pkg add https://github.com/pyarmak/os-blocky/releases/download/latest/blocky.pkg
-pkg add https://github.com/pyarmak/os-blocky/releases/download/latest/os-blocky.pkg
+pkg add https://github.com/py-networks/os-blocky/releases/download/latest/blocky.pkg
+pkg add https://github.com/py-networks/os-blocky/releases/download/latest/os-blocky.pkg
 ```
 
 Note that the plugin ships a firmware hook

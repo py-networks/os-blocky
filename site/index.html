@@ -119,7 +119,7 @@ if you would rather manage updates by hand.
 <li>Target: OPNsense 26.7 (<code>FreeBSD:15:amd64</code>)</li>
 <li>Catalogue URL: <code>https://py-networks.github.io/os-blocky/pkg/26.7/latest</code></li>
 <li>Signing: RSA, <code>signature_type: pubkey</code> &mdash; <a href="os-blocky.pub">os-blocky.pub</a></li>
-<li>Priority 5, below the OPNsense repository, so it can never shadow a core package</li>
+<li>Priority 200 &mdash; contains only <code>blocky</code> and <code>os-blocky</code>, so it cannot shadow an OPNsense core package, but it outranks other third-party repositories shipping <code>blocky</code></li>
 <li>Only the newest build of each package is kept in the catalogue; older builds stay available as release assets</li>
 </ul>
 

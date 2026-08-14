@@ -41,8 +41,10 @@ pkg install os-blocky
 the public key is not where the repository configuration expects it. From then on the plugin appears
 under **System → Firmware → Plugins** and upgrades with the rest of the system.
 
-The repository is registered at priority 5, below the OPNsense repository's 11, so it can never
-shadow a core package.
+The repository is registered at priority 200. It contains only `blocky` and `os-blocky`, so it
+cannot shadow an OPNsense core package, but it does outrank other third-party repositories that
+also ship a `blocky` package (mimugmail's sits at 190) — pkg picks by repository priority, not by
+version.
 
 ### By sideloading
 

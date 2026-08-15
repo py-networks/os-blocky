@@ -86,6 +86,17 @@ jobs:
             pkg install -y git gmake go126 ca_root_nss \
                 php85 php85-phar php85-tokenizer php85-xmlwriter php85-simplexml php85-dom \
                 python312 py312-pycodestyle
+            # Package with the same pkg the target runs. FreeBSD's current pkg writes every
+            # +MANIFEST "files" entry as an object carrying the checksum, and pkg 2.3.1 -- what
+            # OPNsense 26.7 ships -- does not know that schema: it logs "Skipping unknown key for
+            # file(...): sum", leaves every checksum NULL, and then dereferences the NULL, so
+            # installing the package segfaults instead of failing cleanly. Pinning here is safe in
+            # the forward direction because newer pkg still reads the classic string form, so this
+            # only needs revisiting if we ever have to emit something 2.3.1 cannot produce.
+            # Locked so that installing anything later cannot quietly pull pkg forward again.
+            pkg add -f https://pkg.opnsense.org/FreeBSD:15:amd64/26.7/latest/All/pkg-2.3.1_1.pkg
+            pkg lock -y pkg
+            pkg -v
             # Mk/defaults.mk probes this exact path to derive PLUGIN_PYTHON.
             ln -sf /usr/local/bin/python3.12 /usr/local/bin/python3
             # make style passes vacuously when phpcs is missing, so install it for real.
@@ -174,6 +185,10 @@ jobs:
           # what makes an installed plugin subscribe the firewall to this repository.
           tar -xOf "$pkg" +MANIFEST | grep -q 'firmware/repos/OsBlocky.php' \
               || { echo "the repository hook is not wired into +POST_INSTALL" >&2; exit 1; }
+          # Both packages have to carry classic checksums, or pkg 2.3.1 on the firewall segfaults
+          # while installing them. See the script and the pkg pin in the prepare step above.
+          python3 "$GITHUB_WORKSPACE/.github/scripts/check-manifest.py" \
+              "$pkg" "$BLOCKY_PORT"/work/pkg/blocky-*.pkg
 
       - name: Sign the package catalogue
         shell: freebsd {0}

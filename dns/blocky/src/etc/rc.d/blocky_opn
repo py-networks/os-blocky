@@ -7,6 +7,15 @@
 # This is the stock dns/blocky rc script with the daemon output sent to syslog instead of a flat
 # file, so that the log is picked up by syslog-ng and rendered by the OPNsense log viewer. The
 # port's own script stays disabled; see the rc.conf.d template.
+#
+# REQUIRE is deliberately left at the stock value. rcorder already resolves it to a position after
+# both unbound and dnsmasq, so blocky is the last resolver to reach for port 53 -- and it loses
+# outright if either of them is still holding it. blocky answers that by exiting rather than
+# retrying the bind, which at boot is indistinguishable from never having been started at all.
+# daemon(8) supervises the process instead: it re-runs blocky every blocky_opn_restart_delay
+# seconds, at most blocky_opn_restart_count times, so a port that frees up shortly after boot (or a
+# daemon that dies later on) recovers on its own, while a genuinely broken configuration still
+# gives up instead of looping forever.
 
 . /etc/rc.subr
 
@@ -18,13 +27,50 @@ load_rc_config ${name}
 : ${blocky_opn_enable:=NO}
 : ${blocky_opn_config:="/usr/local/etc/blocky-config.yml"}
 : ${blocky_opn_flags:=}
+: ${blocky_opn_restart_delay:=10}
+: ${blocky_opn_restart_count:=30}
 
-pidfile="/var/run/blocky.pid"
 blocky_path="/usr/local/sbin/blocky"
 
+# rc.subr has to track the supervisor, not blocky itself, or `stop` would kill the child and have
+# it immediately restarted underneath us. Leaving procname at its default of ${command} is what
+# makes that work: rc.subr matches "daemon:", the process title daemon(8) sets for itself.
+pidfile="/var/run/blocky_opn.pid"
+# plugins.inc.d/blocky.inc points the OPNsense services dashboard at the child pid, so that it
+# reports on blocky rather than on a supervisor that outlives it.
+child_pidfile="/var/run/blocky.pid"
+
 command="/usr/sbin/daemon"
-procname="${blocky_path}"
-command_args="-c -f -S -T blocky -p ${pidfile} ${blocky_path} \
-	-c ${blocky_opn_config} ${blocky_opn_flags}"
+command_args="-c -f -S -T blocky -p ${child_pidfile} -P ${pidfile} \
+	-R ${blocky_opn_restart_delay} -C ${blocky_opn_restart_count} \
+	${blocky_path} -c ${blocky_opn_config} ${blocky_opn_flags}"
+
+start_precmd="blocky_opn_prestart"
+
+blocky_opn_prestart()
+{
+	# configd runs this by way of prepare.sh before a GUI-driven start, but a boot-time start
+	# comes straight through rc.d, where nothing else creates the directories blocky writes to.
+	# blocky refuses to start when the query log target is missing.
+	/usr/local/opnsense/scripts/OPNsense/Blocky/setup.sh
+
+	# Versions before supervision was introduced were tracked by the child pidfile alone, so
+	# `stop` during a package upgrade looks in ${pidfile}, finds nothing, and leaves that daemon
+	# running -- and the start below then fails on the port it is still holding. Retire it here.
+	if [ ! -f ${pidfile} -a -f ${child_pidfile} ]; then
+		read _stale _junk < ${child_pidfile}
+		if [ -n "${_stale}" ] && kill -0 ${_stale} 2> /dev/null; then
+			warn "stopping the unsupervised blocky left over from an earlier version"
+			# Its daemon(8) parent has to go first, or it would restart the child.
+			_parent=$(ps -o ppid= -p ${_stale} 2> /dev/null | tr -d ' ')
+			if [ -n "${_parent}" -a "${_parent}" != "1" ]; then
+				kill -TERM ${_parent} 2> /dev/null
+			fi
+			kill -TERM ${_stale} 2> /dev/null
+			wait_for_pids ${_stale}
+		fi
+		rm -f ${child_pidfile}
+	fi
+}
 
 run_rc_command "$1"

@@ -29,6 +29,7 @@ export default class BlockyStats extends BaseWidget {
         super();
         this.chart = null;
         this.tickTimeout = 60;
+        this.hourFormat = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
     }
 
     getGridOptions() {
@@ -85,8 +86,20 @@ export default class BlockyStats extends BaseWidget {
         this._renderChart(stats.result.perHour || []);
     }
 
+    /* blocky reports every bucket as an RFC 3339 instant in UTC ("2026-08-15T13:00:00Z").
+       Slicing the string would label the bars in UTC while the rest of the dashboard is in the
+       browser's zone, so parse it and let Intl render it locally, the way core's Firewall widget
+       labels its own time axis. */
+    _hourLabel(value) {
+        const when = new Date(value);
+        if (isNaN(when.getTime())) {
+            return String(value || '');
+        }
+        return this.hourFormat.format(when);
+    }
+
     _renderChart(perHour) {
-        const labels = perHour.map((row) => (row.hour || '').substring(11, 16));
+        const labels = perHour.map((row) => this._hourLabel(row.hour));
         /* "queries" is the total, so the allowed share is what is left after blocked and filtered */
         const allowed = perHour.map((row) =>
             Math.max((row.queries || 0) - (row.blocked || 0) - (row.filtered || 0), 0));

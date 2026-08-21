@@ -29,6 +29,11 @@
 
     Thin client for blocky's REST API. Always prints a JSON object so that the
     calling controller can decode it without special casing failures.
+
+    The Prometheus endpoint is the one exception to "blocky speaks JSON": it
+    answers in the text exposition format, so it is parsed here rather than
+    handed on verbatim. That keeps the whole surface of this script decodable
+    by the controller, and spares every consumer its own parser.
 """
 
 import json
@@ -43,6 +48,17 @@ DEFAULT_ENDPOINT = '127.0.0.1:4000'
 # Refreshing every list can take minutes on a slow provider.
 TIMEOUT_SLOW = 300
 TIMEOUT_FAST = 15
+
+# One label pair of the Prometheus text format. Splitting the label set on commas would corrupt
+# values that contain one themselves, and blocky writes several -- reason="BLOCKED (core, security)".
+LABEL_PAIR = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)="((?:[^"\\]|\\.)*)"')
+# Escapes are undone in a single pass; doing it as successive replacements would turn a literal
+# backslash followed by "n" into a newline.
+LABEL_ESCAPE = re.compile(r'\\(.)')
+LABEL_UNESCAPED = {'n': '\n', '"': '"', '\\': '\\'}
+# Histogram buckets are one series per boundary and are of no use without a Prometheus server to
+# aggregate them. The _count and _sum companions survive, which is what an average is derived from.
+SKIP_SUFFIX = '_bucket'
 
 
 def api_endpoint():
@@ -86,6 +102,74 @@ def call(path, method='GET', payload=None, timeout=TIMEOUT_FAST):
         return {'status': 'ok', 'result': body}
 
 
+def parse_labels(text):
+    labels = {}
+
+    for name, value in LABEL_PAIR.findall(text):
+        labels[name] = LABEL_ESCAPE.sub(
+            lambda match: LABEL_UNESCAPED.get(match.group(1), match.group(1)), value)
+
+    return labels
+
+
+def parse_metrics(text):
+    """Turn the Prometheus text exposition format into decodable JSON.
+
+    Every metric becomes a list of samples, whether it carries labels or not, so
+    that a consumer can read result[name][0]["value"] without first knowing
+    which of the two shapes to expect.
+    """
+    metrics = {}
+
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+
+        head, brace, rest = line.partition('{')
+        if brace:
+            # The label set ends at the last brace; blocky writes no braces inside label values.
+            body, _, value = rest.rpartition('}')
+            name, labels = head, parse_labels(body)
+        else:
+            name, _, value = line.partition(' ')
+            labels = {}
+
+        name = name.strip()
+        if not name or name.endswith(SKIP_SUFFIX):
+            continue
+
+        try:
+            number = float(value.split()[0])
+        except (IndexError, ValueError):
+            continue
+
+        # NaN and the infinities have no JSON spelling; json would emit them as bare words that a
+        # strict decoder rejects, so an unusable sample is reported as null instead.
+        if number != number or number in (float('inf'), float('-inf')):
+            number = None
+        elif number.is_integer():
+            number = int(number)
+
+        metrics.setdefault(name, []).append({'value': number, 'labels': labels})
+
+    return metrics
+
+
+def metrics():
+    """blocky answers 404 here unless the Prometheus exporter is switched on."""
+    result = call('/metrics')
+
+    if result.get('status') != 'ok':
+        return result
+
+    body = result.get('result')
+    if not isinstance(body, str):
+        return {'status': 'failed', 'message': 'unexpected metrics response'}
+
+    return {'status': 'ok', 'result': parse_metrics(body)}
+
+
 def main():
     args = sys.argv[1:]
     command = args[0] if args else ''
@@ -108,6 +192,8 @@ def main():
         result = call('/api/cache/flush', method='POST')
     elif command == 'stats':
         result = call('/api/stats')
+    elif command == 'metrics':
+        result = metrics()
     elif command == 'query':
         if len(args) < 2 or not args[1]:
             result = {'status': 'failed', 'message': 'no name to look up'}

@@ -79,6 +79,81 @@ point on. Removing the plugin removes both files too.
   repository, so it reports `blocky` and `os-blocky` as foreign. That is expected for any
   third-party package.
 
+## API
+
+Every endpoint below is served by the OPNsense web GUI, so it takes the same authentication as the
+rest of it: HTTP basic, with an API **key** as the username and the matching **secret** as the
+password, created under System → Access → Users. The account needs the *Services: Blocky* privilege
+(`page-services-blocky`). The GUI's certificate is normally the firewall's own, so a client will
+have to be told not to verify it.
+
+```sh
+curl -k -u "$KEY:$SECRET" https://opnsense.example:PORT/api/blocky/blocking/status
+```
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| GET | `/api/blocky/blocking/status` | `{"enabled": …}`, plus `autoEnableInSec` and `disabledGroups` while paused |
+| POST | `/api/blocky/blocking/enable` | |
+| POST | `/api/blocky/blocking/disable` | `duration` (`5m`, `2h`, empty for indefinite) and `groups` |
+| POST | `/api/blocky/blocking/refresh` | re-downloads every list; takes minutes |
+| POST | `/api/blocky/blocking/flushcache` | |
+| POST | `/api/blocky/blocking/query` | `name` and `type`, a lookup through blocky |
+| GET | `/api/blocky/status/stats` | blocky's own rolling 24 hour statistics |
+| GET | `/api/blocky/status/metrics` | blocky's Prometheus counters, as JSON |
+| GET | `/api/blocky/status/history` | hourly totals counted out of the query log, `days` |
+| GET | `/api/blocky/service/status` | whether blocky is running, independently of blocking state |
+| POST | `/api/blocky/service/start`, `/stop`, `/restart` | |
+| GET | `/api/blocky/querylog/files` | |
+| GET | `/api/blocky/querylog/search` | `file`, `searchPhrase`, `current`, `rowCount` |
+
+Results are wrapped as `{"status": "ok", "result": …}`, or `{"status": "failed", "message": …}` when
+blocky could not be reached.
+
+### Which of the three statistics endpoints to use
+
+They answer different questions, and the difference matters if you are drawing a graph.
+
+`status/stats` is what blocky itself remembers: a rolling **24 hours**, held in memory, **discarded
+when blocky restarts**. Its `perHour` array is a ready-made hourly series, and its totals are the
+totals *of that window* — they fall as the window slides, so they are gauges, not counters.
+
+`status/metrics` is the Prometheus exporter, decoded from the text exposition format into JSON so
+that it needs no parser at the other end. Every metric is a list of samples:
+
+```json
+{"status": "ok", "result": {
+    "blocky_cache_hits_total": [{"value": 294321, "labels": {}}],
+    "blocky_denylist_cache_entries": [{"value": 222518, "labels": {"group": "core"}},
+                                      {"value": 2392485, "labels": {"group": "security"}}]
+}}
+```
+
+These are genuine monotonic counters — but only since blocky started; they reset to zero on
+restart. Histogram buckets are dropped, as they are of little use without a Prometheus server to
+aggregate them; the `_count` and `_sum` companions are kept. The exporter has to be switched on in
+Settings → General, and `metrics_enabled` reports whether it is.
+
+`status/history` counts the query log files instead, which is the only record here that outlives a
+restart. It returns the same shape of hourly series as `perHour`, reaching back as far as the
+configured retention:
+
+```json
+{"status": "ok", "days": 7, "files": ["2026-08-20_ALL.log", …], "buckets": [
+    {"hour": "2026-08-20T19:00:00-05:00", "queries": 1394, "blocked": 204,
+     "cached": 677, "resolved": 475, "filtered": 0, "errors": 4}
+]}
+```
+
+`days` defaults to 7 and is capped at 31, because every day it covers is a log file read from end to
+end. Hours in which blocky answered nothing are filled in as zeroes rather than left out, so the
+series has no holes. `queries` is the total, so allowed traffic is `queries - blocked - filtered`;
+`errors` counts SERVFAIL responses. Timestamps carry the firewall's own UTC offset, where
+`status/stats` reports its hours in UTC — both are RFC 3339, but do not compare the strings.
+
+This endpoint requires the query log to be enabled in Settings → Query Log, and reaches back only as
+far as its retention setting.
+
 ## Building from source
 
 Building requires a FreeBSD 15.1 host. `Mk/defaults.mk` probes `/usr/local/bin/php` and
